@@ -6,55 +6,74 @@
     <title>لوحة تحكم المدرسة - نظام الكابتن</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --royal-green: #004225; --gold-accent: #FFD700; --light-cream: #F5F5DC; --dark-charcoal: #333333; --white: #FFFFFF; --light-gray: #f8f9fa; }
-        body { font-family: 'Tajawal', sans-serif; background-color: var(--light-cream ); margin: 0; display: flex; height: 100vh; flex-direction: column; }
-        .main-container { display: flex; flex-grow: 1; }
-        .sidebar { width: 250px; background-color: var(--royal-green); color: var(--white); display: flex; flex-direction: column; padding: 20px; box-shadow: -5px 0 15px rgba(0,0,0,0.1); z-index: 10; }
-        .sidebar h2 { text-align: center; color: var(--gold-accent); margin-bottom: 50px; font-size: 24px; }
-        .sidebar nav a { color: var(--white); text-decoration: none; padding: 15px 20px; display: flex; align-items: center; gap: 10px; border-radius: 8px; margin-bottom: 10px; transition: background-color 0.3s; }
-        .sidebar nav a:hover { background-color: rgba(255, 255, 255, 0.1); }
-        .sidebar nav a .icon { font-size: 20px; }
-        .main-content { flex-grow: 1; padding: 40px; display: flex; flex-direction: column; }
-        .header { border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 30px; }
-        h1 { color: var(--dark-charcoal); display: flex; align-items: center; gap: 15px; font-size: 32px; margin: 0; }
-        h1 .icon { color: var(--royal-green); }
-        #schoolName { color: var(--royal-green); }
-        .content-body { flex-grow: 1; }
-        /* **الإضافة الهندسية:** تصميم قسم الحقوق */
-        .footer { text-align: center; padding: 20px; background-color: #e9e9e2; color: #777; font-size: 14px; border-top: 1px solid #ddd; }
+        :root { --royal-green: #004225; --gold-accent: #FFD700; --light-cream: #F5F5DC; --dark-charcoal: #333333; --white: #FFFFFF; --light-gray: #f8f9fa; --gray-border: #dee2e6; --hover-green: #005a34; }
+        body { font-family: 'Tajawal', sans-serif; background-color: var(--light-cream ); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { width: 260px; background-color: var(--royal-green); color: var(--white); display: flex; flex-direction: column; box-shadow: -5px 0 15px rgba(0,0,0,0.1); z-index: 10; }
+        .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255, 215, 0, 0.2); }
+        .sidebar-header h2 { margin: 0; color: var(--gold-accent); font-size: 26px; }
+        .sidebar nav { flex-grow: 1; padding: 20px 0; }
+        .sidebar nav a { color: var(--white); text-decoration: none; padding: 15px 25px; display: flex; align-items: center; gap: 15px; margin: 0 10px 10px 10px; border-radius: 8px; transition: background-color 0.3s, color 0.3s; font-weight: 500; }
+        .sidebar nav a.active, .sidebar nav a:hover { background-color: var(--light-cream); color: var(--royal-green); }
+        .sidebar-footer { padding: 20px; border-top: 1px solid rgba(255, 215, 0, 0.2); }
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; }
+        .header { background-color: var(--white); padding: 20px 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 5; }
+        h1 { color: var(--dark-charcoal); display: flex; align-items: center; gap: 15px; font-size: 28px; margin: 0; }
+        #schoolName { color: var(--royal-green); font-weight: 700; }
+        .content-body { flex-grow: 1; padding: 40px; overflow-y: auto; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .footer { text-align: center; padding: 15px; background-color: #e9e9e2; color: #777; font-size: 14px; border-top: 1px solid #ddd; }
     </style>
 </head>
 <body>
-    <div class="main-container">
-        <div class="sidebar">
-            <h2>نظام <span style="color: var(--gold-accent);">الكابتن</span></h2>
-            <nav>
-                <!-- **التعديل:** تصميم زر العودة الاحترافي -->
-                <a href="captain_dashboard.html">
-                    <span class="icon">➔</span>
-                    <span>العودة للإدارة</span>
-                </a>
-            </nav>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2 id="schoolNameAbbr">نظام الكابتن</h2>
         </div>
-        <div class="main-content">
-            <div class="header">
-                <h1>
-                    <span class="icon">🏫</span>
-                    <span>لوحة التحكم الخاصة بـمدرسة: <span id="schoolName">جاري التحميل...</span></span>
-                </h1>
-            </div>
-            <div class="content-body">
-                <p>هنا ستظهر لوحة التحكم الخاصة بالمدرسة المحددة (إدارة الوكلاء، المعلمين، الطلاب، إلخ).</p>
-            </div>
+        <nav>
+            <a href="#" class="tab-link active" data-tab="dashboard"><span>🏠</span><span>لوحة القيادة</span></a>
+            <a href="#" class="tab-link" data-tab="agents"><span>👥</span><span>الوكلاء</span></a>
+            <a href="#" class="tab-link" data-tab="teachers"><span>🧑‍🏫</span><span>المعلمون</span></a>
+            <a href="#" class="tab-link" data-tab="students"><span>🎓</span><span>الطلاب</span></a>
+            <a href="#" class="tab-link" data-tab="settings"><span>⚙️</span><span>الإعدادات</span></a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="captain_dashboard.html"><span>➔</span><span>كل المدارس</span></a>
         </div>
     </div>
-    <!-- **الإضافة الهندسية:** قسم الحقوق -->
-    <footer class="footer">
-        © 2025 نظام الكابتن التعليمي. جميع الحقوق محفوظة.
-    </footer>
+    <div class="main-content">
+        <header class="header">
+            <h1>لوحة التحكم الخاصة بـمدرسة: <span id="schoolName">جاري التحميل...</span></h1>
+        </header>
+        <main class="content-body">
+            <div id="dashboard" class="tab-content active">
+                <h2>مرحباً بك في لوحة قيادة المدرسة</h2>
+                <p>هنا ستظهر الإحصائيات والبيانات الهامة الخاصة بالمدرسة.</p>
+            </div>
+            <div id="agents" class="tab-content">
+                <h2>إدارة الوكلاء</h2>
+                <p>هنا سيتم عرض وإضافة وتعديل وحذف الوكلاء.</p>
+            </div>
+            <div id="teachers" class="tab-content">
+                <h2>إدارة المعلمين</h2>
+                <p>هنا سيتم عرض وإضافة وتعديل وحذف المعلمين.</p>
+            </div>
+            <div id="students" class="tab-content">
+                <h2>إدارة الطلاب</h2>
+                <p>هنا سيتم عرض وإضافة وتعديل وحذف الطلاب.</p>
+            </div>
+            <div id="settings" class="tab-content">
+                <h2>إعدادات المدرسة</h2>
+                <p>هنا سيتم التحكم في إعدادات هذه المدرسة.</p>
+            </div>
+        </main>
+        <footer class="footer">
+            © 2025 نظام الكابتن التعليمي. جميع الحقوق محفوظة.
+        </footer>
+    </div>
 
     <script>
         const supabaseUrl = 'https://xpeubmofhyoqupsjfalq.supabase.co';
@@ -62,6 +81,7 @@
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey );
 
         const schoolNameSpan = document.getElementById('schoolName');
+        const schoolNameAbbrSpan = document.getElementById('schoolNameAbbr');
 
         async function loadSchoolData() {
             const params = new URLSearchParams(window.location.search);
@@ -72,25 +92,38 @@
                 return;
             }
 
-            const { data: school, error } = await _supabase
-                .from('schools')
-                .select('name')
-                .eq('id', schoolId)
-                .single();
+            const { data: school, error } = await _supabase.from('schools').select('name').eq('id', schoolId).single();
 
             if (error) {
                 console.error('Error fetching school data:', error);
                 schoolNameSpan.textContent = "خطأ في تحميل بيانات المدرسة.";
             } else if (school) {
                 schoolNameSpan.textContent = school.name;
+                schoolNameAbbrSpan.textContent = school.name;
                 document.title = `لوحة تحكم ${school.name} - نظام الكابتن`;
             } else {
                 schoolNameSpan.textContent = "المدرسة غير موجودة.";
             }
         }
 
+        // **منطق التبويبات الجديد**
+        const tabLinks = document.querySelectorAll('.tab-link');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                tabLinks.forEach(l => l.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                link.classList.add('active');
+                const tabId = link.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
         document.addEventListener('DOMContentLoaded', loadSchoolData);
     </script>
 </body>
 </html>
-
