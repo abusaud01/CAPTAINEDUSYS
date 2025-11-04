@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم المدرسة - نظام الكابتن</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --royal-green: #004225; --gold-accent: #FFD700; --light-cream: #F5F5DC; --dark-charcoal: #333333; --white: #FFFFFF; }
+        body { font-family: 'Tajawal', sans-serif; background-color: var(--light-cream ); margin: 0; display: flex; height: 100vh; }
+        .sidebar { width: 250px; background-color: var(--royal-green); color: var(--white); padding: 20px; }
+        .main-content { flex-grow: 1; padding: 40px; }
+        h1 { color: var(--dark-charcoal); }
+        #schoolName { color: var(--royal-green); }
+        a { color: var(--royal-green); }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>نظام <span style="color: var(--gold-accent);">الكابتن</span></h2>
+        <nav>
+            <a href="captain_dashboard.html">العودة إلى لوحة الإدارة</a>
+        </nav>
+    </div>
+    <div class="main-content">
+        <h1>لوحة التحكم الخاصة بـ: <span id="schoolName">جاري التحميل...</span></h1>
+        <p>هنا ستظهر لوحة التحكم الخاصة بالمدرسة المحددة.</p>
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://xpeubmofhyoqupsjfalq.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZXVibW9maHlvcXVwc2pmYWxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyNTM3NzgsImV4cCI6MjA3NzgyOTc3OH0.A7zvw6etTDGe-WhWCisvtYcxy_JANWSBW1r3XOh2LVA';
+        const _supabase = supabase.createClient(supabaseUrl, supabaseKey );
+
+        const schoolNameSpan = document.getElementById('schoolName');
+
+        // **الوظيفة الجديدة:** قراءة الـ ID من الرابط وجلب بيانات المدرسة
+        async function loadSchoolData() {
+            const params = new URLSearchParams(window.location.search);
+            const schoolId = params.get('id');
+
+            if (!schoolId) {
+                schoolNameSpan.textContent = "خطأ: لم يتم تحديد المدرسة.";
+                return;
+            }
+
+            const { data: school, error } = await _supabase
+                .from('schools')
+                .select('name')
+                .eq('id', schoolId)
+                .single(); // .single() لجلب سجل واحد فقط
+
+            if (error) {
+                console.error('Error fetching school data:', error);
+                schoolNameSpan.textContent = "خطأ في تحميل بيانات المدرسة.";
+            } else if (school) {
+                schoolNameSpan.textContent = school.name;
+                document.title = `لوحة تحكم ${school.name} - نظام الكابتن`; // تحديث عنوان الصفحة
+            } else {
+                schoolNameSpan.textContent = "المدرسة غير موجودة.";
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadSchoolData);
+    </script>
+</body>
+</html>
