@@ -44,6 +44,10 @@
         .data-table { width: 100%; border-collapse: collapse; }
         .data-table th, .data-table td { padding: 12px; text-align: right; border-bottom: 1px solid #f0f0f0; }
         .data-table th { background-color: #f9f9f9; }
+        .activity-list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+        .activity-list-item:last-child { border-bottom: none; }
+        .activity-description { display: flex; align-items: center; gap: 10px; }
+        .activity-time { font-size: 12px; color: #888; }
     </style>
 </head>
 <body>
@@ -97,8 +101,25 @@
         const agentsCountSpan = document.getElementById('agents-count');
         const teachersCountSpan = document.getElementById('teachers-count');
         const studentsCountSpan = document.getElementById('students-count');
+        const activityListDiv = document.getElementById('activity-list');
         const params = new URLSearchParams(window.location.search);
         const schoolId = params.get('id');
+
+        async function logEvent(eventType, description) {
+            await _supabase.from('school_events').insert([{ school_id: schoolId, event_type: eventType, description: description }]);
+            loadActivityFeed();
+        }
+
+        async function loadActivityFeed() {
+            if (!schoolId) return;
+            const { data: events, error } = await _supabase.from('school_events').select('*').eq('school_id', schoolId).order('created_at', { ascending: false }).limit(5);
+            if (error) { console.error('Error loading events:', error); return; }
+            activityListDiv.innerHTML = '';
+            events.forEach(event => {
+                const eventTime = new Date(event.created_at).toLocaleString('ar-SA');
+                activityListDiv.innerHTML += `<div class="activity-list-item"><div class="activity-description"><span>${event.description}</span></div><span class="activity-time">${eventTime}</span></div>`;
+            });
+        }
 
         async function loadDashboardStats() {
             if (!schoolId) return;
@@ -160,7 +181,7 @@
                 if (name && email) {
                     const { error } = await _supabase.from('agents').insert([{ name, email, school_id: schoolId }]);
                     if (error) { Swal.fire('خطأ!', `حدث خطأ: ${error.message}`, 'error'); } 
-                    else { Swal.fire('تم!', 'تمت إضافة الوكيل بنجاح.', 'success'); loadAgents(); loadDashboardStats(); }
+                    else { Swal.fire('تم!', 'تمت إضافة الوكيل بنجاح.', 'success'); loadAgents(); loadDashboardStats(); logEvent('ADD_AGENT', `تمت إضافة الوكيل: ${name}`); }
                 }
             }
         });
@@ -172,7 +193,7 @@
                 if (name && email) {
                     const { error } = await _supabase.from('teachers').insert([{ name, email, school_id: schoolId }]);
                     if (error) { Swal.fire('خطأ!', `حدث خطأ: ${error.message}`, 'error'); }
-                    else { Swal.fire('تم!', 'تمت إضافة المعلم بنجاح.', 'success'); loadTeachers(); loadDashboardStats(); }
+                    else { Swal.fire('تم!', 'تمت إضافة المعلم بنجاح.', 'success'); loadTeachers(); loadDashboardStats(); logEvent('ADD_TEACHER', `تمت إضافة المعلم: ${name}`); }
                 }
             }
         });
@@ -184,7 +205,7 @@
                 if (name && className) {
                     const { error } = await _supabase.from('students').insert([{ name, class: className, school_id: schoolId }]);
                     if (error) { Swal.fire('خطأ!', `حدث خطأ: ${error.message}`, 'error'); }
-                    else { Swal.fire('تم!', 'تمت إضافة الطالب بنجاح.', 'success'); loadStudents(); loadDashboardStats(); }
+                    else { Swal.fire('تم!', 'تمت إضافة الطالب بنجاح.', 'success'); loadStudents(); loadDashboardStats(); logEvent('ADD_STUDENT', `تمت إضافة الطالب: ${name}`); }
                 }
             }
         });
@@ -208,6 +229,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadSchoolName();
             loadDashboardStats();
+            loadActivityFeed();
         });
     </script>
 </body>
