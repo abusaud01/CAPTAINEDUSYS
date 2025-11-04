@@ -44,6 +44,8 @@
         .data-table { width: 100%; border-collapse: collapse; }
         .data-table th, .data-table td { padding: 12px; text-align: right; border-bottom: 1px solid #f0f0f0; }
         .data-table th { background-color: #f9f9f9; }
+        .data-table a { color: var(--royal-green); text-decoration: none; font-weight: 700; }
+        .data-table a:hover { text-decoration: underline; }
         .activity-list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
         .activity-list-item:last-child { border-bottom: none; }
         .activity-description { display: flex; align-items: center; gap: 10px; }
@@ -170,7 +172,7 @@
             const tableBody = document.getElementById('students-table-body');
             tableBody.innerHTML = '';
             students.forEach(student => {
-                tableBody.innerHTML += `<tr><td>${student.name}</td><td>${student.class}</td><td><button>تعديل</button> <button>حذف</button></td></tr>`;
+                tableBody.innerHTML += `<tr><td><a href="student_profile.html?id=${student.id}&school_id=${schoolId}">${student.name}</a></td><td>${student.class}</td><td><button>تعديل</button> <button>حذف</button></td></tr>`;
             });
         }
 
