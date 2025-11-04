@@ -18,6 +18,9 @@
         .sidebar nav a { color: var(--white); text-decoration: none; padding: 15px 25px; display: flex; align-items: center; gap: 15px; margin: 0 10px 10px 10px; border-radius: 8px; transition: background-color 0.3s, color 0.3s; font-weight: 500; }
         .sidebar nav a.active, .sidebar nav a:hover { background-color: var(--light-cream); color: var(--royal-green); }
         .sidebar-footer { padding: 20px; border-top: 1px solid rgba(255, 215, 0, 0.2); }
+        /* **التعديل:** تصميم زر العودة بشكل احترافي */
+        .back-btn { background-color: rgba(255, 215, 0, 0.8); color: var(--dark-charcoal); font-weight: 700; }
+        .back-btn:hover { background-color: var(--gold-accent) !important; color: var(--dark-charcoal) !important; }
         .main-content { flex-grow: 1; display: flex; flex-direction: column; }
         .header { background-color: var(--white); padding: 20px 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 5; }
         h1 { color: var(--dark-charcoal); display: flex; align-items: center; gap: 15px; font-size: 28px; margin: 0; }
@@ -41,12 +44,16 @@
             <a href="#" class="tab-link" data-tab="settings"><span>⚙️</span><span>الإعدادات</span></a>
         </nav>
         <div class="sidebar-footer">
-            <a href="captain_dashboard.html"><span>➔</span><span>كل المدارس</span></a>
+            <a href="captain_dashboard.html" class="back-btn"><span>➔</span><span>كل المدارس</span></a>
         </div>
     </div>
     <div class="main-content">
         <header class="header">
-            <h1>لوحة التحكم الخاصة بـمدرسة: <span id="schoolName">جاري التحميل...</span></h1>
+            <h1>
+                <span>🏫</span>
+                <!-- **التعديل:** إضافة كلمة "بمدرسة" -->
+                <span>لوحة التحكم الخاصة بمدرسة: <span id="schoolName">جاري التحميل...</span></span>
+            </h1>
         </header>
         <main class="content-body">
             <div id="dashboard" class="tab-content active">
@@ -106,7 +113,6 @@
             }
         }
 
-        // **منطق التبويبات الجديد**
         const tabLinks = document.querySelectorAll('.tab-link');
         const tabContents = document.querySelectorAll('.tab-content');
 
