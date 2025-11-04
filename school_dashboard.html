@@ -71,16 +71,13 @@
                 <div class="activity-feed"><h2>آخر الأحداث</h2><div id="activity-list"></div></div>
             </div>
             <div id="agents" class="tab-content management-section">
-                <div class="section-header">
-                    <h2>إدارة الوكلاء</h2>
-                    <button id="add-agent-btn" class="add-btn">+ إضافة وكيل جديد</button>
-                </div>
-                <table class="data-table">
-                    <thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>إجراءات</th></tr></thead>
-                    <tbody id="agents-table-body"></tbody>
-                </table>
+                <div class="section-header"><h2>إدارة الوكلاء</h2><button id="add-agent-btn" class="add-btn">+ إضافة وكيل جديد</button></div>
+                <table class="data-table"><thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>إجراءات</th></tr></thead><tbody id="agents-table-body"></tbody></table>
             </div>
-            <div id="teachers" class="tab-content"><h2>إدارة المعلمين</h2></div>
+            <div id="teachers" class="tab-content management-section">
+                <div class="section-header"><h2>إدارة المعلمين</h2><button id="add-teacher-btn" class="add-btn">+ إضافة معلم جديد</button></div>
+                <table class="data-table"><thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>إجراءات</th></tr></thead><tbody id="teachers-table-body"></tbody></table>
+            </div>
             <div id="students" class="tab-content"><h2>إدارة الطلاب</h2></div>
             <div id="settings" class="tab-content"><h2>إعدادات المدرسة</h2></div>
         </main>
@@ -131,32 +128,37 @@
             });
         }
 
-        document.getElementById('add-agent-btn').addEventListener('click', async () => {
-            const { value: formValues } = await Swal.fire({
-                title: 'إضافة وكيل جديد',
-                html:
-                    '<input id="swal-input1" class="swal2-input" placeholder="اسم الوكيل">' +
-                    '<input id="swal-input2" class="swal2-input" placeholder="البريد الإلكتروني">',
-                focusConfirm: false,
-                preConfirm: () => {
-                    return [
-                        document.getElementById('swal-input1').value,
-                        document.getElementById('swal-input2').value
-                    ]
-                }
+        async function loadTeachers() {
+            if (!schoolId) return;
+            const { data: teachers, error } = await _supabase.from('teachers').select('*').eq('school_id', schoolId).order('created_at');
+            if (error) { console.error('Error loading teachers:', error); return; }
+            const tableBody = document.getElementById('teachers-table-body');
+            tableBody.innerHTML = '';
+            teachers.forEach(teacher => {
+                tableBody.innerHTML += `<tr><td>${teacher.name}</td><td>${teacher.email}</td><td><button>تعديل</button> <button>حذف</button></td></tr>`;
             });
+        }
 
+        document.getElementById('add-agent-btn').addEventListener('click', async () => {
+            const { value: formValues } = await Swal.fire({ title: 'إضافة وكيل جديد', html: '<input id="swal-input1" class="swal2-input" placeholder="اسم الوكيل"><input id="swal-input2" class="swal2-input" placeholder="البريد الإلكتروني">', focusConfirm: false, preConfirm: () => [document.getElementById('swal-input1').value, document.getElementById('swal-input2').value] });
             if (formValues) {
                 const [name, email] = formValues;
                 if (name && email) {
                     const { error } = await _supabase.from('agents').insert([{ name, email, school_id: schoolId }]);
-                    if (error) {
-                        Swal.fire('خطأ!', `حدث خطأ أثناء إضافة الوكيل: ${error.message}`, 'error');
-                    } else {
-                        Swal.fire('تم!', 'تمت إضافة الوكيل بنجاح.', 'success');
-                        loadAgents();
-                        loadDashboardStats();
-                    }
+                    if (error) { Swal.fire('خطأ!', `حدث خطأ: ${error.message}`, 'error'); } 
+                    else { Swal.fire('تم!', 'تمت إضافة الوكيل بنجاح.', 'success'); loadAgents(); loadDashboardStats(); }
+                }
+            }
+        });
+
+        document.getElementById('add-teacher-btn').addEventListener('click', async () => {
+            const { value: formValues } = await Swal.fire({ title: 'إضافة معلم جديد', html: '<input id="swal-input1" class="swal2-input" placeholder="اسم المعلم"><input id="swal-input2" class="swal2-input" placeholder="البريد الإلكتروني">', focusConfirm: false, preConfirm: () => [document.getElementById('swal-input1').value, document.getElementById('swal-input2').value] });
+            if (formValues) {
+                const [name, email] = formValues;
+                if (name && email) {
+                    const { error } = await _supabase.from('teachers').insert([{ name, email, school_id: schoolId }]);
+                    if (error) { Swal.fire('خطأ!', `حدث خطأ: ${error.message}`, 'error'); }
+                    else { Swal.fire('تم!', 'تمت إضافة المعلم بنجاح.', 'success'); loadTeachers(); loadDashboardStats(); }
                 }
             }
         });
@@ -171,7 +173,8 @@
                 link.classList.add('active');
                 const tabId = link.getAttribute('data-tab');
                 document.getElementById(tabId).classList.add('active');
-                if (tabId === 'agents') { loadAgents(); }
+                if (tabId === 'agents') loadAgents();
+                if (tabId === 'teachers') loadTeachers();
             });
         });
 
