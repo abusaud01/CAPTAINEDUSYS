@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ملف الطالب - نظام الكابتن</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root { --royal-green: #004225; --gold-accent: #FFD700; --light-cream: #F5F5DC; --dark-charcoal: #333333; --white: #FFFFFF; --light-gray: #f8f9fa; --gray-border: #dee2e6; --danger-red: #dc3545; --success-green: #198754; }
+        body { font-family: 'Tajawal', sans-serif; background-color: var(--light-cream ); margin: 0; }
+        .header { background-color: var(--royal-green); color: var(--white); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header h1 { margin: 0; font-size: 28px; }
+        .back-btn { background-color: transparent; border: 2px solid var(--gold-accent); color: var(--gold-accent); padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; transition: all 0.3s ease; }
+        .back-btn:hover { background-color: var(--gold-accent); color: var(--royal-green); }
+        .main-container { padding: 40px; }
+        .profile-header { background-color: var(--white); padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
+        .profile-info h2 { margin: 0 0 10px 0; font-size: 24px; color: var(--dark-charcoal); }
+        .profile-info p { margin: 0; color: #555; }
+        .behavior-score { text-align: center; }
+        .behavior-score h3 { margin: 0 0 10px 0; color: #555; }
+        .behavior-score p { margin: 0; font-size: 36px; font-weight: 700; color: var(--royal-green); }
+        .actions-container { display: flex; gap: 15px; margin-bottom: 30px; }
+        .action-btn { border: none; padding: 12px 25px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 16px; transition: transform 0.2s; }
+        .action-btn:hover { transform: translateY(-2px); }
+        .add-praise { background-color: var(--success-green); color: var(--white); }
+        .add-violation { background-color: var(--danger-red); color: var(--white); }
+        .log-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .log-section { background-color: var(--white); padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .log-section h3 { margin-top: 0; border-bottom: 1px solid var(--gray-border); padding-bottom: 15px; margin-bottom: 15px; }
+        .log-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+        .log-item:last-child { border-bottom: none; }
+        .log-item-desc { color: var(--dark-charcoal); }
+        .log-item-meta { font-size: 12px; color: #888; }
+        .footer { text-align: center; padding: 20px; margin-top: 40px; color: #777; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <h1>ملف الطالب: <span id="studentNameHeader">...</span></h1>
+        <a href="#" id="backToDashboard" class="back-btn">« العودة إلى لوحة التحكم</a>
+    </header>
+
+    <div class="main-container">
+        <div class="profile-header">
+            <div class="profile-info">
+                <h2 id="studentName">...</h2>
+                <p>الفصل: <span id="studentClass">...</span></p>
+            </div>
+            <div class="behavior-score">
+                <h3>درجة السلوك</h3>
+                <p id="behaviorScore">100</p>
+            </div>
+        </div>
+
+        <div class="actions-container">
+            <button id="add-praise-btn" class="action-btn add-praise">+ إضافة سلوك إيجابي</button>
+            <button id="add-violation-btn" class="action-btn add-violation">- تسجيل مخالفة</button>
+        </div>
+
+        <div class="log-container">
+            <div class="log-section">
+                <h3><span style="color: var(--success-green);">✔</span> سجل الإيجابيات</h3>
+                <div id="praises-log"></div>
+            </div>
+            <div class="log-section">
+                <h3><span style="color: var(--danger-red);">✖</span> سجل المخالفات</h3>
+                <div id="violations-log"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">© 2025 نظام الكابتن التعليمي. جميع الحقوق محفوظة.</footer>
+
+    <script>
+        const supabaseUrl = 'https://xpeubmofhyoqupsjfalq.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZXVibW9maHlvcXVwc2pmYWxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyNTM3NzgsImV4cCI6MjA3NzgyOTc3OH0.A7zvw6etTDGe-WhWCisvtYcxy_JANWSBW1r3XOh2LVA';
+        const _supabase = supabase.createClient(supabaseUrl, supabaseKey );
+
+        const params = new URLSearchParams(window.location.search);
+        const studentId = params.get('id');
+        const schoolId = params.get('school_id');
+
+        const studentNameHeader = document.getElementById('studentNameHeader');
+        const studentName = document.getElementById('studentName');
+        const studentClass = document.getElementById('studentClass');
+        const backToDashboardBtn = document.getElementById('backToDashboard');
+
+        async function loadStudentProfile() {
+            if (!studentId) return;
+
+            // Set back button URL
+            backToDashboardBtn.href = `school_dashboard.html?id=${schoolId}`;
+
+            // Fetch student info
+            const { data: student, error } = await _supabase.from('students').select('name, class').eq('id', studentId).single();
+            if (error) {
+                console.error('Error fetching student:', error);
+                return;
+            }
+            studentNameHeader.textContent = student.name;
+            studentName.textContent = student.name;
+            studentClass.textContent = student.class;
+            document.title = `ملف الطالب: ${student.name} - نظام الكابتن`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!studentId || !schoolId) {
+                document.body.innerHTML = '<h1>خطأ: لم يتم تحديد الطالب أو المدرسة.</h1>';
+                return;
+            }
+            loadStudentProfile();
+        });
+    </script>
+
+</body>
+</html>
