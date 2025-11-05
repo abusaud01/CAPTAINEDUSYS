@@ -4,13 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة تحكم الكابتن</title>
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <style>
         :root { --royal-green: #004225; --gold-accent: #FFD700; --light-cream: #F5F5DC; --dark-charcoal: #333333; }
         body { font-family: 'Tajawal', sans-serif; background-color: var(--light-cream ); color: var(--dark-charcoal); margin: 0; display: flex; }
@@ -49,77 +46,73 @@
         <div id="dashboard">
             <header>
                 <h1>إدارة المدارس</h1>
-                <button class="add-school-btn" onclick="openAddSchoolModal()">+ إضافة مدرسة جديدة</button>
+                <button class="add-school-btn" id="add-school-button">+ إضافة مدرسة جديدة</button>
             </header>
             <div id="schools-list-container" class="schools-list">
                 <p id="no-schools-message">جاري تحميل المدارس...</p>
             </div>
         </div>
-        <div id="log" style="display: none;">
-            <!-- محتوى سجل النظام الشامل -->
-        </div>
+        <div id="log" style="display: none;"></div>
     </div>
 
     <div id="addSchoolModal" class="modal-overlay">
         <div class="modal-content">
             <h2>إضافة مدرسة جديدة</h2>
-            <form id="add-school-form" onsubmit="handleAddSchool(event)">
+            <form id="add-school-form">
                 <input type="text" id="school-name-input" class="modal-input" placeholder="أدخل اسم المدرسة هنا..." required>
                 <div class="modal-actions">
                     <button type="submit" class="btn-confirm">إضافة</button>
-                    <button type="button" class="btn-cancel" onclick="closeAddSchoolModal()">إلغاء</button>
+                    <button type="button" class="btn-cancel" id="cancel-button">إلغاء</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        // **التصحيح:** تعريف Supabase فورًا عند تحميل الصفحة
-        const supabaseUrl = 'https://xpeubmofhyoqupsjfalq.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZXVibW9maHlvcXVwc2pmYWxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyNTM3NzgsImV4cCI6MjA3NzgyOTc3OH0.A7zvw6etTDGe-WhWCisvtYcxy_JANWSBW1r3XOh2LVA';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey );
+        // **التصحيح:** انتظار تحميل الصفحة بالكامل قبل تنفيذ أي كود
+        document.addEventListener('DOMContentLoaded', () => {
+            const supabaseUrl = 'https://xpeubmofhyoqupsjfalq.supabase.co';
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZXVibW9maHlvcXVwc2pmYWxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyNTM3NzgsImV4cCI6MjA3NzgyOTc3OH0.A7zvw6etTDGe-WhWCisvtYcxy_JANWSBW1r3XOh2LVA';
+            const supabase = supabase.createClient(supabaseUrl, supabaseKey );
 
-        function showSection(sectionId) {
-            document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('log').style.display = 'none';
-            document.getElementById(sectionId).style.display = 'block';
-            document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
-            document.querySelector(`.sidebar nav a[onclick="showSection('${sectionId}')"]`).classList.add('active');
-        }
+            const modal = document.getElementById('addSchoolModal');
+            const addSchoolButton = document.getElementById('add-school-button');
+            const cancelButton = document.getElementById('cancel-button');
+            const addSchoolForm = document.getElementById('add-school-form');
 
-        const modal = document.getElementById('addSchoolModal');
-        function openAddSchoolModal() { modal.style.display = 'flex'; }
-        function closeAddSchoolModal() {
-            modal.style.display = 'none';
-            document.getElementById('add-school-form').reset();
-        }
-        window.onclick = function(event) { if (event.target == modal) { closeAddSchoolModal(); } }
+            addSchoolButton.addEventListener('click', () => modal.style.display = 'flex');
+            cancelButton.addEventListener('click', () => {
+                modal.style.display = 'none';
+                addSchoolForm.reset();
+            });
+            window.addEventListener('click', (event) => { if (event.target == modal) { modal.style.display = 'none'; addSchoolForm.reset(); } });
 
-        async function handleAddSchool(event) {
-            event.preventDefault();
-            const schoolNameInput = document.getElementById('school-name-input');
-            const schoolName = schoolNameInput.value.trim();
-            if (schoolName) {
-                const { data, error } = await supabase.from('schools').insert([{ name: schoolName }]).select();
-                if (error) {
-                    console.error('Error adding school:', error.message);
-                    alert('حدث خطأ أثناء إضافة المدرسة.');
-                } else {
-                    addSchoolToList(data[0]);
-                    closeAddSchoolModal();
+            addSchoolForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const schoolNameInput = document.getElementById('school-name-input');
+                const schoolName = schoolNameInput.value.trim();
+                if (schoolName) {
+                    const { data, error } = await supabase.from('schools').insert([{ name: schoolName }]).select();
+                    if (error) {
+                        console.error('Error adding school:', error.message);
+                        alert('حدث خطأ أثناء إضافة المدرسة.');
+                    } else {
+                        addSchoolToList(data[0]);
+                        cancelButton.click(); // لإغلاق النافذة وإعادة تعيينها
+                    }
                 }
-            }
-        }
+            });
 
-        function addSchoolToList(school) {
-            const listContainer = document.getElementById('schools-list-container');
-            const noSchoolsMessage = document.getElementById('no-schools-message');
-            if (noSchoolsMessage) { noSchoolsMessage.remove(); }
-            const schoolItem = document.createElement('div');
-            schoolItem.className = 'school-item';
-            schoolItem.innerHTML = `<span>${school.name}</span>`;
-            listContainer.appendChild(schoolItem);
-        }
+            function addSchoolToList(school) {
+                const listContainer = document.getElementById('schools-list-container');
+                const noSchoolsMessage = document.getElementById('no-schools-message');
+                if (noSchoolsMessage) { noSchoolsMessage.remove(); }
+                const schoolItem = document.createElement('div');
+                schoolItem.className = 'school-item';
+                schoolItem.innerHTML = `<span>${school.name}</span>`;
+                listContainer.appendChild(schoolItem);
+            }
+        });
     </script>
 </body>
 </html>
