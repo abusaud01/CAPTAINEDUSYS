@@ -11,17 +11,21 @@
     <style>
         :root { --royal-green: #004225; --gold-accent: #FFD700; --light-cream: #F5F5DC; --dark-charcoal: #333333; --white: #FFFFFF; }
         body { font-family: 'Tajawal', sans-serif; background-color: var(--light-cream ); margin: 0; display: flex; height: 100vh; }
-        .sidebar { width: 250px; background-color: var(--royal-green); color: var(--white); padding: 20px; }
+        .sidebar { width: 250px; background-color: var(--royal-green); color: var(--white); display: flex; flex-direction: column; padding: 20px; box-shadow: -5px 0 15px rgba(0,0,0,0.1); z-index: 10; }
+        .sidebar h2 { text-align: center; color: var(--gold-accent); margin-bottom: 30px; font-size: 24px; }
+        /* **التعديل:** إضافة نفس تنسيق الروابط من الصفحة الرئيسية */
+        .sidebar nav a { color: var(--white); text-decoration: none; padding: 15px 20px; display: block; border-radius: 8px; margin-bottom: 10px; transition: background-color 0.3s; }
+        .sidebar nav a:hover { background-color: rgba(255, 255, 255, 0.1); }
         .main-content { flex-grow: 1; padding: 40px; }
         h1 { color: var(--dark-charcoal); }
         #schoolName { color: var(--royal-green); }
-        a { color: var(--royal-green); }
     </style>
 </head>
 <body>
     <div class="sidebar">
         <h2>نظام <span style="color: var(--gold-accent);">الكابتن</span></h2>
         <nav>
+            <!-- **الإضافة الهندسية:** زر العودة إلى لوحة الإدارة الرئيسية -->
             <a href="captain_dashboard.html">العودة إلى لوحة الإدارة</a>
         </nav>
     </div>
@@ -37,7 +41,6 @@
 
         const schoolNameSpan = document.getElementById('schoolName');
 
-        // **الوظيفة الجديدة:** قراءة الـ ID من الرابط وجلب بيانات المدرسة
         async function loadSchoolData() {
             const params = new URLSearchParams(window.location.search);
             const schoolId = params.get('id');
@@ -51,14 +54,14 @@
                 .from('schools')
                 .select('name')
                 .eq('id', schoolId)
-                .single(); // .single() لجلب سجل واحد فقط
+                .single();
 
             if (error) {
                 console.error('Error fetching school data:', error);
                 schoolNameSpan.textContent = "خطأ في تحميل بيانات المدرسة.";
             } else if (school) {
                 schoolNameSpan.textContent = school.name;
-                document.title = `لوحة تحكم ${school.name} - نظام الكابتن`; // تحديث عنوان الصفحة
+                document.title = `لوحة تحكم ${school.name} - نظام الكابتن`;
             } else {
                 schoolNameSpan.textContent = "المدرسة غير موجودة.";
             }
