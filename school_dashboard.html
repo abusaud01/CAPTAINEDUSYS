@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         /* ... نفس كود التصميم السابق ... */
         :root { --royal-green: #004225; --gold-accent: #FFD700; --light-cream: #F5F5DC; --dark-charcoal: #333333; --white: #FFFFFF; --light-gray: #f8f9fa; --gray-border: #dee2e6; }
@@ -35,21 +36,19 @@
         .stat-card .icon { font-size: 40px; color: var(--royal-green); }
         .stat-card .info h3 { margin: 0 0 5px 0; color: #555; font-size: 16px; }
         .stat-card .info p { margin: 0; color: var(--dark-charcoal); font-size: 28px; font-weight: 700; }
-        .activity-feed { background-color: var(--white); padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .activity-feed h2 { margin-top: 0; border-bottom: 1px solid var(--gray-border); padding-bottom: 15px; margin-bottom: 20px; }
-        .activity-item { display: flex; gap: 15px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
-        .activity-item:last-child { border-bottom: none; }
-        .activity-item .icon { font-size: 20px; }
-        .activity-item .details { flex-grow: 1; }
-        .activity-item .timestamp { font-size: 12px; color: #999; }
+        .activity-feed, .management-section { background-color: var(--white); padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .section-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--gray-border); padding-bottom: 15px; margin-bottom: 20px; }
+        .section-header h2 { margin: 0; }
+        .add-btn { background-color: var(--gold-accent); color: var(--royal-green); border: none; padding: 10px 20px; border-radius: 5px; font-weight: 700; cursor: pointer; transition: background-color 0.3s; }
+        .add-btn:hover { background-color: #e6c300; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 12px; text-align: right; border-bottom: 1px solid #f0f0f0; }
+        .data-table th { background-color: #f9f9f9; }
     </style>
 </head>
 <body>
-    <!-- ... نفس هيكل HTML السابق ... -->
     <div class="sidebar">
-        <div class="sidebar-header">
-            <h2 id="schoolNameAbbr">نظام الكابتن</h2>
-        </div>
+        <div class="sidebar-header"><h2 id="schoolNameAbbr">نظام الكابتن</h2></div>
         <nav>
             <a href="#" class="tab-link active" data-tab="dashboard"><span>🏠</span><span>لوحة القيادة</span></a>
             <a href="#" class="tab-link" data-tab="agents"><span>👥</span><span>الوكلاء</span></a>
@@ -57,64 +56,35 @@
             <a href="#" class="tab-link" data-tab="students"><span>🎓</span><span>الطلاب</span></a>
             <a href="#" class="tab-link" data-tab="settings"><span>⚙️</span><span>الإعدادات</span></a>
         </nav>
-        <div class="sidebar-footer">
-            <a href="captain_dashboard.html" class="back-btn"><span>«</span> كل المدارس</a>
-        </div>
+        <div class="sidebar-footer"><a href="captain_dashboard.html" class="back-btn"><span>«</span> كل المدارس</a></div>
     </div>
     <div class="main-content">
-        <header class="header">
-            <h1>
-                <span>🏫</span>
-                <span>لوحة التحكم الخاصة بمدرسة: <span id="schoolName">جاري التحميل...</span></span>
-            </h1>
-        </header>
+        <header class="header"><h1><span>🏫</span><span>لوحة التحكم الخاصة بمدرسة: <span id="schoolName">...</span></span></h1></header>
         <main class="content-body">
             <div id="dashboard" class="tab-content active">
                 <div class="stats-grid">
-                    <div class="stat-card">
-                        <span class="icon">👥</span>
-                        <div class="info">
-                            <h3>الوكلاء</h3>
-                            <p id="agents-count">...</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <span class="icon">🧑‍🏫</span>
-                        <div class="info">
-                            <h3>المعلمون</h3>
-                            <p id="teachers-count">...</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <span class="icon">🎓</span>
-                        <div class="info">
-                            <h3>الطلاب</h3>
-                            <p id="students-count">...</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <span class="icon">⚠️</span>
-                        <div class="info">
-                            <h3>المخالفات اليوم</h3>
-                            <p>0</p>
-                        </div>
-                    </div>
+                    <div class="stat-card"><span class="icon">👥</span><div class="info"><h3>الوكلاء</h3><p id="agents-count">...</p></div></div>
+                    <div class="stat-card"><span class="icon">🧑‍🏫</span><div class="info"><h3>المعلمون</h3><p id="teachers-count">...</p></div></div>
+                    <div class="stat-card"><span class="icon">🎓</span><div class="info"><h3>الطلاب</h3><p id="students-count">...</p></div></div>
+                    <div class="stat-card"><span class="icon">⚠️</span><div class="info"><h3>المخالفات اليوم</h3><p>0</p></div></div>
                 </div>
-                <div class="activity-feed">
-                    <h2>آخر الأحداث</h2>
-                    <div id="activity-list">
-                        <!-- سيتم ملء هذا القسم بالبيانات الديناميكية -->
-                    </div>
-                </div>
+                <div class="activity-feed"><h2>آخر الأحداث</h2><div id="activity-list"></div></div>
             </div>
-            <div id="agents" class="tab-content"><h2>إدارة الوكلاء</h2><p>هنا سيتم عرض وإضافة وتعديل وحذف الوكلاء.</p></div>
-            <div id="teachers" class="tab-content"><h2>إدارة المعلمين</h2><p>هنا سيتم عرض وإضافة وتعديل وحذف المعلمين.</p></div>
-            <div id="students" class="tab-content"><h2>إدارة الطلاب</h2><p>هنا سيتم عرض وإضافة وتعديل وحذف الطلاب.</p></div>
-            <div id="settings" class="tab-content"><h2>إعدادات المدرسة</h2><p>هنا سيتم التحكم في إعدادات هذه المدرسة.</p></div>
+            <div id="agents" class="tab-content management-section">
+                <div class="section-header">
+                    <h2>إدارة الوكلاء</h2>
+                    <button id="add-agent-btn" class="add-btn">+ إضافة وكيل جديد</button>
+                </div>
+                <table class="data-table">
+                    <thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>إجراءات</th></tr></thead>
+                    <tbody id="agents-table-body"></tbody>
+                </table>
+            </div>
+            <div id="teachers" class="tab-content"><h2>إدارة المعلمين</h2></div>
+            <div id="students" class="tab-content"><h2>إدارة الطلاب</h2></div>
+            <div id="settings" class="tab-content"><h2>إعدادات المدرسة</h2></div>
         </main>
-        <footer class="footer">
-            © 2025 نظام الكابتن التعليمي. جميع الحقوق محفوظة.
-        </footer>
+        <footer class="footer">© 2025 نظام الكابتن التعليمي. جميع الحقوق محفوظة.</footer>
     </div>
 
     <script>
@@ -127,44 +97,72 @@
         const agentsCountSpan = document.getElementById('agents-count');
         const teachersCountSpan = document.getElementById('teachers-count');
         const studentsCountSpan = document.getElementById('students-count');
+        const params = new URLSearchParams(window.location.search);
+        const schoolId = params.get('id');
 
-        async function loadDashboard() {
-            const params = new URLSearchParams(window.location.search);
-            const schoolId = params.get('id');
+        async function loadDashboardStats() {
+            if (!schoolId) return;
+            const { count: agentsCount } = await _supabase.from('agents').select('*', { count: 'exact', head: true }).eq('school_id', schoolId);
+            agentsCountSpan.textContent = agentsCount ?? 0;
+            const { count: teachersCount } = await _supabase.from('teachers').select('*', { count: 'exact', head: true }).eq('school_id', schoolId);
+            teachersCountSpan.textContent = teachersCount ?? 0;
+            const { count: studentsCount } = await _supabase.from('students').select('*', { count: 'exact', head: true }).eq('school_id', schoolId);
+            studentsCountSpan.textContent = studentsCount ?? 0;
+        }
 
-            if (!schoolId) {
-                schoolNameSpan.textContent = "خطأ: لم يتم تحديد المدرسة.";
-                return;
-            }
-
-            // جلب اسم المدرسة
-            const { data: school, error: schoolError } = await _supabase.from('schools').select('name').eq('id', schoolId).single();
-            if (schoolError) console.error('Error fetching school name:', schoolError);
-            else if (school) {
+        async function loadSchoolName() {
+            if (!schoolId) { schoolNameSpan.textContent = "خطأ"; return; }
+            const { data: school } = await _supabase.from('schools').select('name').eq('id', schoolId).single();
+            if (school) {
                 schoolNameSpan.textContent = school.name;
                 schoolNameAbbrSpan.textContent = school.name;
                 document.title = `لوحة تحكم ${school.name} - نظام الكابتن`;
             }
-
-            // جلب عدد الوكلاء
-            const { count: agentsCount, error: agentsError } = await _supabase.from('agents').select('*', { count: 'exact', head: true }).eq('school_id', schoolId);
-            if (agentsError) console.error('Error fetching agents count:', agentsError);
-            else agentsCountSpan.textContent = agentsCount;
-
-            // جلب عدد المعلمين
-            const { count: teachersCount, error: teachersError } = await _supabase.from('teachers').select('*', { count: 'exact', head: true }).eq('school_id', schoolId);
-            if (teachersError) console.error('Error fetching teachers count:', teachersError);
-            else teachersCountSpan.textContent = teachersCount;
-
-            // جلب عدد الطلاب
-            const { count: studentsCount, error: studentsError } = await _supabase.from('students').select('*', { count: 'exact', head: true }).eq('school_id', schoolId);
-            if (studentsError) console.error('Error fetching students count:', studentsError);
-            else studentsCountSpan.textContent = studentsCount;
         }
+
+        async function loadAgents() {
+            if (!schoolId) return;
+            const { data: agents, error } = await _supabase.from('agents').select('*').eq('school_id', schoolId).order('created_at');
+            if (error) { console.error('Error loading agents:', error); return; }
+            const tableBody = document.getElementById('agents-table-body');
+            tableBody.innerHTML = '';
+            agents.forEach(agent => {
+                tableBody.innerHTML += `<tr><td>${agent.name}</td><td>${agent.email}</td><td><button>تعديل</button> <button>حذف</button></td></tr>`;
+            });
+        }
+
+        document.getElementById('add-agent-btn').addEventListener('click', async () => {
+            const { value: formValues } = await Swal.fire({
+                title: 'إضافة وكيل جديد',
+                html:
+                    '<input id="swal-input1" class="swal2-input" placeholder="اسم الوكيل">' +
+                    '<input id="swal-input2" class="swal2-input" placeholder="البريد الإلكتروني">',
+                focusConfirm: false,
+                preConfirm: () => {
+                    return [
+                        document.getElementById('swal-input1').value,
+                        document.getElementById('swal-input2').value
+                    ]
+                }
+            });
+
+            if (formValues) {
+                const [name, email] = formValues;
+                if (name && email) {
+                    const { error } = await _supabase.from('agents').insert([{ name, email, school_id: schoolId }]);
+                    if (error) {
+                        Swal.fire('خطأ!', `حدث خطأ أثناء إضافة الوكيل: ${error.message}`, 'error');
+                    } else {
+                        Swal.fire('تم!', 'تمت إضافة الوكيل بنجاح.', 'success');
+                        loadAgents();
+                        loadDashboardStats();
+                    }
+                }
+            }
+        });
 
         const tabLinks = document.querySelectorAll('.tab-link');
         const tabContents = document.querySelectorAll('.tab-content');
-
         tabLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -173,10 +171,14 @@
                 link.classList.add('active');
                 const tabId = link.getAttribute('data-tab');
                 document.getElementById(tabId).classList.add('active');
+                if (tabId === 'agents') { loadAgents(); }
             });
         });
 
-        document.addEventListener('DOMContentLoaded', loadDashboard);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSchoolName();
+            loadDashboardStats();
+        });
     </script>
 </body>
 </html>
