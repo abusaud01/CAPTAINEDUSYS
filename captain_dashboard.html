@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>دخول - نظام الكابتن التعليمي</title>
+    <title>لوحة تحكم الكابتن</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
@@ -11,73 +11,52 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* ... نفس أكواد CSS السابقة ... */
-        :root { --royal-green: #004225; --gold-accent: #FFD700; --light-cream: #F5F5DC; --dark-charcoal: #333333; --error-red: #D32F2F; }
-        body { font-family: 'Tajawal', sans-serif; background-color: var(--light-cream ); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-container { background-color: #FFFFFF; padding: 40px 50px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); width: 400px; text-align: center; border-top: 8px solid var(--royal-green); }
-        .login-container h1 { color: var(--royal-green); font-weight: 700; font-size: 28px; margin-bottom: 10px; }
-        .login-container h1 .gold-text { color: var(--gold-accent); }
-        .login-container p { color: #777; margin-bottom: 30px; }
-        .input-group { margin-bottom: 20px; text-align: right; }
-        .input-group label { display: block; margin-bottom: 8px; color: var(--dark-charcoal); font-weight: 700; }
-        .input-group input { width: 100%; padding: 12px; border: 1px solid #DDD; border-radius: 8px; font-family: 'Tajawal', sans-serif; font-size: 16px; box-sizing: border-box; transition: border-color 0.3s, box-shadow 0.3s; }
-        .input-group input:focus { outline: none; border-color: var(--gold-accent); box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
-        .login-btn { width: 100%; padding: 15px; background-color: var(--royal-green); color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: 700; font-family: 'Tajawal', sans-serif; cursor: pointer; transition: background-color 0.3s, transform 0.2s; }
-        .login-btn:hover { background-color: #005a34; transform: translateY(-2px); }
-        #error-message { color: var(--error-red); margin-top: 15px; font-weight: 700; display: none; }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <h1>نظام <span class="gold-text">الكابتن</span></h1>
-        <p>لوحة تحكم المدير الأساسي</p>
-        <form id="login-form" onsubmit="handleLogin(event)">
-            <div class="input-group">
-                <label for="email">البريد الإلكتروني</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            <div class="input-group">
-                <label for="password">كلمة المرور</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <button type="submit" class="login-btn">تسجيل الدخول</button>
-            <p id="error-message"></p>
-        </form>
-    </div>
-
+    <!-- ... نفس هيكل HTML السابق ... -->
+    
     <script>
         // --- JavaScript: The Brains ---
 
         // 2. إعداد الاتصال مع Supabase باستخدام مفاتيحك
         const supabaseUrl = 'https://xpeubmofhyoqupsjfalq.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZXVibW9maHlvcXVwc2pmYWxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyNTM3NzgsImV4cCI6MjA3NzgyOTc3OH0.A7zvw6etTDGe-WhWCisvtYcxy_JANWSBW1r3XOh2LVA';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZXVibW9maHlvcXVwc2pmYWxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyNTM3NzgsImV4cCI6MjA3NzgyOTc-';
         const supabase = supabase.createClient(supabaseUrl, supabaseKey );
 
+        // --- منطق النافذة المنبثقة (Modal) ---
+        // ... نفس الكود السابق ...
+
         // 3. استبدال المحاكاة بالاتصال الحقيقي
-        async function handleLogin(event) {
+        async function handleAddSchool(event) {
             event.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const errorMessage = document.getElementById('error-message');
-            errorMessage.style.display = 'none';
+            const schoolNameInput = document.getElementById('school-name-input');
+            const schoolName = schoolNameInput.value.trim();
 
-            // الاتصال بـ Supabase لتسجيل الدخول
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: password,
-            });
+            if (schoolName) {
+                console.log(`Sending to Supabase: ${schoolName}`);
 
-            if (error) {
-                // في حال وجود خطأ من Supabase
-                console.error('Authentication error:', error.message);
-                errorMessage.textContent = 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
-                errorMessage.style.display = 'block';
-            } else {
-                // في حال نجاح الدخول
-                console.log('Authentication successful. Redirecting...');
-                // التوجيه إلى لوحة التحكم
-                window.location.href = 'captain_dashboard.html';
+                // الاتصال بـ Supabase لإضافة المدرسة إلى جدول 'schools'
+                const { data, error } = await supabase
+                    .from('schools')
+                    .insert([
+                        { name: schoolName }
+                    ])
+                    .select();
+
+                if (error) {
+                    console.error('Error adding school:', error.message);
+                    alert('حدث خطأ أثناء إضافة المدرسة. يرجى المحاولة مرة أخرى.');
+                } else {
+                    console.log('School added successfully:', data);
+                    // إضافة المدرسة إلى القائمة في الواجهة
+                    addSchoolToList(data[0].name);
+                    closeAddSchoolModal();
+                }
             }
         }
+        
+        // ... باقي دوال JavaScript كما هي ...
     </script>
 </body>
 </html>
