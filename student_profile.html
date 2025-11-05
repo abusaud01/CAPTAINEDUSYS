@@ -103,13 +103,13 @@
         let praiseTypes = {};
         let currentStudentName = '';
 
-        // --- الإصلاح الجراحي 1: تعديل الدالة لتعيد الخطأ ---
+        // --- الإصلاح النهائي: إزالة الحقل الزائد ---
         async function logSchoolEvent(description) {
-            const { error } = await _supabase.from('school_events').insert([{ school_id: schoolId, description: description, event_type: 'Behavior Log' }]);
+            const { error } = await _supabase.from('school_events').insert([{ school_id: schoolId, description: description }]);
             if (error) {
                 console.error('Failed to log school event:', error);
             }
-            return error; // أعد الخطأ (سيكون null في حالة النجاح)
+            return error;
         }
 
         function formatTimeAgo(date) {
@@ -189,7 +189,6 @@
 
             if (violationId) {
                 const selectedViolation = violationTypes[violationId];
-                // الخطوة 1: إضافة السلوك
                 const { error: behaviorError } = await _supabase.from('student_behavior_log').insert([{ student_id: studentId, school_id: schoolId, violation_type_id: violationId, description: selectedViolation.description, deduction_points: selectedViolation.points }]);
                 
                 if (behaviorError) {
@@ -198,16 +197,13 @@
                     return;
                 }
 
-                // الخطوة 2: تسجيل الحدث
                 const logError = await logSchoolEvent(`تم تسجيل مخالفة "${selectedViolation.description}" للطالب: ${currentStudentName}`);
                 
-                // --- الإصلاح الجراحي 2: التحقق من نجاح كلتا العمليتين ---
                 if (logError) {
-                    Swal.fire('خطأ في السجل!', 'تم تسجيل المخالفة ولكن فشل تحديث سجل المدرسة. يرجى مراجعة وحدة التحكم.', 'warning');
-                    // لا نحدث الواجهة هنا لأن العملية لم تكتمل بنجاح
+                    Swal.fire('خطأ في السجل!', 'تم تسجيل المخالفة ولكن فشل تحديث سجل المدرسة.', 'warning');
                 } else {
                     Swal.fire('تم!', 'تم تسجيل المخالفة بنجاح.', 'success');
-                    await loadBehaviorLogs(); // تحديث الواجهة فقط عند النجاح الكامل
+                    await loadBehaviorLogs();
                 }
             }
         });
@@ -224,7 +220,6 @@
 
             if (praiseId) {
                 const selectedPraise = praiseTypes[praiseId];
-                // الخطوة 1: إضافة السلوك
                 const { error: behaviorError } = await _supabase.from('student_behavior_log').insert([{ student_id: studentId, school_id: schoolId, praise_type_id: praiseId, description: selectedPraise.description, reward_points: selectedPraise.points }]);
 
                 if (behaviorError) {
@@ -233,15 +228,13 @@
                     return;
                 }
 
-                // الخطوة 2: تسجيل الحدث
                 const logError = await logSchoolEvent(`تم منح سلوك إيجابي "${selectedPraise.description}" للطالب: ${currentStudentName}`);
 
-                // --- الإصلاح الجراحي 2: التحقق من نجاح كلتا العمليتين ---
                 if (logError) {
-                    Swal.fire('خطأ في السجل!', 'تم تسجيل السلوك ولكن فشل تحديث سجل المدرسة. يرجى مراجعة وحدة التحكم.', 'warning');
+                    Swal.fire('خطأ في السجل!', 'تم تسجيل السلوك ولكن فشل تحديث سجل المدرسة.', 'warning');
                 } else {
                     Swal.fire('تم!', 'تم تسجيل السلوك الإيجابي بنجاح.', 'success');
-                    await loadBehaviorLogs(); // تحديث الواجهة فقط عند النجاح الكامل
+                    await loadBehaviorLogs();
                 }
             }
         });
