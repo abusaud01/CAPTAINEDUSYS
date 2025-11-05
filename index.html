@@ -3,181 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم الكابتن</title>
+    <title>دخول - نظام الكابتن التعليمي</title>
+    
+    <!-- 1. استيراد خط تجوال من جوجل -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+
     <style>
-        /* --- CSS: The Royal Styling --- */
+        /* --- CSS: The Royal Login Styling --- */
         :root {
-            --royal-green: #004225; /* أخضر ملكي عميق */
-            --gold-accent: #FFD700; /* ذهبي للمسات الفاخرة */
-            --light-cream: #F5F5DC; /* كريمي فاتح للخلفيات والنصوص */
-            --dark-charcoal: #333333; /* فحمي داكن للنصوص الثانوية */
+            --royal-green: #004225;
+            --gold-accent: #FFD700;
+            --light-cream: #F5F5DC;
+            --dark-charcoal: #333333;
+            --error-red: #D32F2F;
         }
 
         body {
-            font-family: 'Tahoma', sans-serif; /* خط بسيط وواضح للبداية */
-            background-color: var(--light-cream);
-            color: var(--dark-charcoal);
-            margin: 0;
+            font-family: 'Tajawal', sans-serif;
+            background-color: var(--light-cream );
             display: flex;
-        }
-
-        .sidebar {
-            width: 250px;
-            background-color: var(--royal-green);
-            color: var(--light-cream);
-            padding: 20px;
-            height: 100vh;
-            position: fixed;
-        }
-
-        .sidebar h2 {
-            color: var(--gold-accent);
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .sidebar nav a {
-            display: block;
-            color: var(--light-cream);
-            text-decoration: none;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .sidebar nav a:hover, .sidebar nav a.active {
-            background-color: rgba(255, 215, 0, 0.1); /* لمسة ذهبية شفافة عند التمرير */
-            border-right: 4px solid var(--gold-accent);
-            color: var(--gold-accent);
-        }
-
-        .main-content {
-            margin-right: 250px; /* نفس عرض الشريط الجانبي */
-            padding: 40px;
-            width: calc(100% - 250px);
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-container {
+            background-color: #FFFFFF;
+            padding: 40px 50px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+            border-top: 8px solid var(--royal-green);
+        }
+
+        .login-container h1 {
+            color: var(--royal-green);
+            font-weight: 700;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .login-container h1 .gold-text {
+            color: var(--gold-accent);
+        }
+
+        .login-container p {
+            color: #777;
             margin-bottom: 30px;
         }
 
-        header h1 {
-            color: var(--royal-green);
+        .input-group {
+            margin-bottom: 20px;
+            text-align: right;
         }
 
-        .add-school-btn {
-            background-color: var(--gold-accent);
-            color: var(--royal-green);
-            border: none;
-            padding: 12px 25px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: transform 0.2s;
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark-charcoal);
+            font-weight: 700;
         }
 
-        .add-school-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .log-container {
-            background-color: #FFFFFF;
+        .input-group input {
+            width: 100%;
+            padding: 12px;
             border: 1px solid #DDD;
             border-radius: 8px;
-            padding: 20px;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 16px;
+            box-sizing: border-box; /* To include padding in width */
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
 
-        .log-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid var(--royal-green);
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--gold-accent);
+            box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--royal-green);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 700;
+            font-family: 'Tajawal', sans-serif;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .login-btn:hover {
+            background-color: #005a34; /* درجة أغمق من الأخضر الملكي */
+            transform: translateY(-2px);
         }
         
-        .log-header h3 {
-            color: var(--royal-green);
-            margin: 0;
+        #error-message {
+            color: var(--error-red);
+            margin-top: 15px;
+            font-weight: 700;
+            display: none; /* مخفي بشكل افتراضي */
         }
 
-        .log-entry {
-            border-bottom: 1px solid #EEE;
-            padding: 15px 5px;
-            display: flex;
-            justify-content: space-between;
-        }
-        .log-entry:last-child {
-            border-bottom: none;
-        }
-        .log-entry .timestamp {
-            color: #999;
-            font-size: 14px;
-        }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <h2>نظام الكابتن</h2>
-        <nav>
-            <a href="#" class="active" onclick="showSection('dashboard')">لوحة الإدارة</a>
-            <a href="#" onclick="showSection('log')">سجل النظام الشامل</a>
-        </nav>
-    </div>
+    <div class="login-container">
+        <h1>نظام <span class="gold-text">الكابتن</span></h1>
+        <p>لوحة تحكم المدير الأساسي</p>
 
-    <div class="main-content">
-        <!-- قسم إدارة المدارس -->
-        <div id="dashboard">
-            <header>
-                <h1>إدارة المدارس</h1>
-                <button class="add-school-btn" onclick="alert('سيتم هنا فتح نافذة لإضافة مدرسة جديدة!')">+ إضافة مدرسة جديدة</button>
-            </header>
-            <!-- هنا سنضع قائمة المدارس لاحقاً -->
-            <p>سيتم عرض قائمة المدارس والإحصائيات هنا...</p>
-        </div>
-
-        <!-- قسم الصندوق الأسود -->
-        <div id="log" style="display: none;">
-            <header>
-                <h1>سجل النظام الشامل (الصندوق الأسود)</h1>
-            </header>
-            <div class="log-container">
-                <div class="log-header">
-                    <h3>الأحداث المسجلة</h3>
-                    <!-- هنا سنضع أدوات الفلترة والبحث -->
-                </div>
-                <!-- مثال لحدث مسجل -->
-                <div class="log-entry">
-                    <span><strong style="color: var(--royal-green);">[مدرسة الأبطال]</strong>: المعلم "أحمد" بدأ حصة "الرياضيات".</span>
-                    <span class="timestamp">12:05:34 م</span>
-                </div>
-                <div class="log-entry">
-                    <span><strong style="color: var(--royal-green);">[مدرسة المستقبل]</strong>: الوكيل "خالد" سجل مخالفة "تأخر" على الطالب "سالم".</span>
-                    <span class="timestamp">12:04:10 م</span>
-                </div>
+        <form id="login-form" onsubmit="handleLogin(event)">
+            <div class="input-group">
+                <label for="email">البريد الإلكتروني</label>
+                <input type="email" id="email" name="email" required>
             </div>
-        </div>
+            <div class="input-group">
+                <label for="password">كلمة المرور</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="login-btn">تسجيل الدخول</button>
+            <p id="error-message"></p>
+        </form>
     </div>
 
     <script>
         // --- JavaScript: The Brains ---
-        function showSection(sectionId) {
-            // إخفاء جميع الأقسام
-            document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('log').style.display = 'none';
 
-            // إظهار القسم المطلوب فقط
-            document.getElementById(sectionId).style.display = 'block';
+        // بيانات الدخول الافتراضية للمدير الأساسي (للتطوير فقط)
+        const SUPER_ADMIN_EMAIL = 'captain@system.dev';
+        const SUPER_ADMIN_PASSWORD = 'password123';
 
-            // تحديث الحالة النشطة في الشريط الجانبي
-            document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
-            document.querySelector(`.sidebar nav a[onclick="showSection('${sectionId}')"]`).classList.add('active');
+        function handleLogin(event) {
+            event.preventDefault(); // منع إرسال النموذج بالطريقة التقليدية
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
+
+            // إخفاء رسالة الخطأ عند كل محاولة
+            errorMessage.style.display = 'none';
+
+            // --- محاكاة التحقق من البيانات ---
+            // في هذا الجزء، سنقوم بالتحقق من البيانات محليًا
+            // لاحقًا، سيتم استبدال هذا الجزء بالاتصال الفعلي بـ Supabase
+
+            if (email === SUPER_ADMIN_EMAIL && password === SUPER_ADMIN_PASSWORD) {
+                // في حال نجاح الدخول
+                console.log('Authentication successful. Redirecting...');
+                
+                // SUPABASE_HOOK: هنا سيتم استدعاء supabase.auth.signInWithPassword()
+                // بعد النجاح، سيتم التوجيه تلقائيًا بواسطة Supabase أو يدويًا.
+                
+                // توجيه المستخدم إلى لوحة التحكم
+                // تأكد من أن اسم ملف لوحة التحكم هو "captain_dashboard.html" وفي نفس المجلد
+                window.location.href = 'captain_dashboard.html';
+
+            } else {
+                // في حال فشل الدخول
+                console.error('Authentication failed.');
+                errorMessage.textContent = 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+                errorMessage.style.display = 'block';
+            }
         }
     </script>
 
