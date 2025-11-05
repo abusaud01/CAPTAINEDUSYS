@@ -205,8 +205,6 @@
 
         let currentStudentId = null;
         let currentSchoolId = null;
-        let violationTypes = {};
-        let praiseTypes = {};
 
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -222,9 +220,6 @@
             await loadBehaviorTypes();
             await loadBehaviorLog();
         });
-        
-        document.getElementById('add-violation-btn').addEventListener('click', () => addBehavior('violation'));
-        document.getElementById('add-praise-btn').addEventListener('click', () => addBehavior('praise'));
 
         async function loadStudentData() {
             const { data, error } = await supabase
@@ -249,6 +244,9 @@
             }
         }
 
+        let violationTypes = {};
+        let praiseTypes = {};
+
         async function loadBehaviorTypes() {
             const { data, error } = await supabase.from('behavior_types').select('*');
             if (error) {
@@ -267,12 +265,12 @@
         async function logSchoolEvent(eventType, description) {
             if (!currentSchoolId) {
                 console.error("School ID is not available. Cannot log event.");
-                return { error: { message: "School ID is missing" } };
+                return;
             }
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
                 console.error("User not authenticated.");
-                return { error: { message: "User not authenticated" } };
+                return;
             }
 
             const { data: agentData, error: agentError } = await supabase
@@ -283,7 +281,7 @@
 
             if (agentError) {
                 console.error('Error fetching agent name:', agentError);
-                return { error: agentError };
+                return;
             }
             const agentName = agentData ? agentData.name : 'غير معروف';
             const fullDescription = `${description} (بواسطة: ${agentName})`;
@@ -294,7 +292,9 @@
                 description: fullDescription
             });
 
-            return { error };
+            if (error) {
+                console.error('Failed to log school event:', error);
+            }
         }
 
         async function addBehavior(type) {
@@ -328,8 +328,6 @@
                 const points = isViolation ? typeData.deduction_points : typeData.reward_points;
                 const description = types[selectedId];
 
-                // --- المعاملة المتكاملة تبدأ هنا ---
-                // الخطوة 1: إضافة السلوك إلى سجل الطالب
                 const { error: insertError } = await supabase.from('student_behavior_log').insert({
                     student_id: currentStudentId,
                     school_id: currentSchoolId,
@@ -341,28 +339,20 @@
                 });
 
                 if (insertError) {
-                    console.error('Supabase error (student_behavior_log):', insertError);
+                    console.error('Supabase error:', insertError);
                     Swal.fire('خطأ!', `فشل تسجيل السلوك: ${insertError.message}`, 'error');
-                    return; // أوقف العملية إذا فشلت الخطوة الأولى
+                } else {
+                    Swal.fire('تم!', `تم تسجيل السلوك بنجاح.`, 'success');
+                    const eventType = isViolation ? 'Violation Added' : 'Praise Added';
+                    const eventDescription = `تسجيل سلوك للطالب ${document.getElementById('student-name').textContent}: ${description}`;
+                    await logSchoolEvent(eventType, eventDescription);
+                    await loadBehaviorLog(); // Refresh logs and score
                 }
-
-                // الخطوة 2: تسجيل الحدث في سجل المدرسة
-                const eventType = isViolation ? 'Violation Added' : 'Praise Added';
-                const eventDescription = `تسجيل سلوك للطالب ${document.getElementById('student-name').textContent}: ${description}`;
-                const { error: logError } = await logSchoolEvent(eventType, eventDescription);
-
-                if (logError) {
-                    console.error('Supabase error (school_events):', logError);
-                    Swal.fire('خطأ!', `فشل تسجيل الحدث في سجل المدرسة: ${logError.message}`, 'error');
-                    // هنا يمكن إضافة منطق للتراجع عن الخطوة الأولى إذا أردنا ذلك
-                    return; // أوقف العملية إذا فشلت الخطوة الثانية
-                }
-                
-                // الخطوة 3: إظهار النجاح وتحديث الواجهة فقط إذا نجحت كلتا العمليتين
-                Swal.fire('تم!', `تم تسجيل السلوك بنجاح.`, 'success');
-                await loadBehaviorLog(); // Refresh logs and score
             }
         }
+
+        document.getElementById('add-violation-btn').addEventListener('click', () => addBehavior('violation'));
+        document.getElementById('add-praise-btn').addEventListener('click', () => addBehavior('praise'));
 
         async function loadBehaviorLog() {
             const { data, error } = await supabase
