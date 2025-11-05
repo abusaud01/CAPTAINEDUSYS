@@ -4,59 +4,240 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة تحكم الكابتن</title>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-    <!-- 1. تضمين مكتبة Supabase -->
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
-        /* ... نفس أكواد CSS السابقة ... */
+        :root {
+            --royal-green: #004225;
+            --gold-accent: #FFD700;
+            --light-cream: #F5F5DC;
+            --dark-charcoal: #333333;
+        }
+        body {
+            font-family: 'Tajawal', sans-serif; 
+            background-color: var(--light-cream );
+            color: var(--dark-charcoal);
+            margin: 0;
+            display: flex;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: var(--royal-green);
+            color: var(--light-cream);
+            padding: 20px;
+            height: 100vh;
+            position: fixed;
+            box-shadow: -5px 0px 15px rgba(0, 0, 0, 0.2);
+        }
+        .sidebar h2 {
+            color: var(--gold-accent);
+            text-align: center;
+            margin-bottom: 40px;
+            font-weight: 700;
+        }
+        .sidebar nav a {
+            display: block;
+            color: var(--light-cream);
+            text-decoration: none;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: background-color 0.3s, color 0.3s;
+            font-weight: 400;
+        }
+        .sidebar nav a:hover, .sidebar nav a.active {
+            background-color: rgba(255, 215, 0, 0.1);
+            border-right: 4px solid var(--gold-accent);
+            color: var(--gold-accent);
+            font-weight: 700;
+        }
+        .main-content {
+            margin-right: 250px;
+            padding: 40px;
+            width: calc(100% - 250px);
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        header h1 {
+            color: var(--royal-green);
+            font-weight: 700;
+        }
+        .add-school-btn {
+            background-color: var(--gold-accent);
+            color: var(--royal-green);
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Tajawal', sans-serif;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .add-school-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2);
+        }
+        .schools-list {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.07);
+        }
+        .school-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .school-item:last-child { border-bottom: none; }
+        .school-item span { font-size: 18px; }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            width: 500px;
+            text-align: center;
+            border-top: 8px solid var(--royal-green);
+        }
+        .modal-content h2 { color: var(--royal-green); }
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #DDD;
+            border-radius: 8px;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 16px;
+            box-sizing: border-box;
+            margin-top: 20px;
+            margin-bottom: 30px;
+        }
+        .modal-actions button {
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Tajawal', sans-serif;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            margin: 0 10px;
+        }
+        .btn-confirm {
+            background-color: var(--royal-green);
+            color: white;
+        }
+        .btn-cancel {
+            background-color: #DDD;
+            color: var(--dark-charcoal);
+        }
     </style>
 </head>
 <body>
-    <!-- ... نفس هيكل HTML السابق ... -->
-    
-    <script>
-        // --- JavaScript: The Brains ---
+    <div class="sidebar">
+        <h2>نظام الكابتن</h2>
+        <nav>
+            <a href="#" class="active" onclick="showSection('dashboard')">لوحة الإدارة</a>
+            <a href="#" onclick="showSection('log')">سجل النظام الشامل</a>
+        </nav>
+    </div>
 
-        // 2. إعداد الاتصال مع Supabase باستخدام مفاتيحك
+    <div class="main-content">
+        <div id="dashboard">
+            <header>
+                <h1>إدارة المدارس</h1>
+                <button class="add-school-btn" onclick="openAddSchoolModal()">+ إضافة مدرسة جديدة</button>
+            </header>
+            <div id="schools-list-container" class="schools-list">
+                <p id="no-schools-message">جاري تحميل المدارس...</p>
+            </div>
+        </div>
+        <div id="log" style="display: none;">
+            <!-- محتوى سجل النظام الشامل -->
+        </div>
+    </div>
+
+    <div id="addSchoolModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>إضافة مدرسة جديدة</h2>
+            <form id="add-school-form" onsubmit="handleAddSchool(event)">
+                <input type="text" id="school-name-input" class="modal-input" placeholder="أدخل اسم المدرسة هنا..." required>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-confirm">إضافة</button>
+                    <button type="button" class="btn-cancel" onclick="closeAddSchoolModal()">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
         const supabaseUrl = 'https://xpeubmofhyoqupsjfalq.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZXVibW9maHlvcXVwc2pmYWxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyNTM3NzgsImV4cCI6MjA3NzgyOTc-';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZXVibW9maHlvcXVwc2pmYWxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyNTM3NzgsImV4cCI6MjA3NzgyOTc3OH0.A7zvw6etTDGe-WhWCisvtYcxy_JANWSBW1r3XOh2LVA';
         const supabase = supabase.createClient(supabaseUrl, supabaseKey );
 
-        // --- منطق النافذة المنبثقة (Modal) ---
-        // ... نفس الكود السابق ...
+        function showSection(sectionId) {
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('log').style.display = 'none';
+            document.getElementById(sectionId).style.display = 'block';
+            document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
+            document.querySelector(`.sidebar nav a[onclick="showSection('${sectionId}')"]`).classList.add('active');
+        }
 
-        // 3. استبدال المحاكاة بالاتصال الحقيقي
+        const modal = document.getElementById('addSchoolModal');
+        function openAddSchoolModal() { modal.style.display = 'flex'; }
+        function closeAddSchoolModal() {
+            modal.style.display = 'none';
+            document.getElementById('add-school-form').reset();
+        }
+        window.onclick = function(event) { if (event.target == modal) { closeAddSchoolModal(); } }
+
         async function handleAddSchool(event) {
             event.preventDefault();
             const schoolNameInput = document.getElementById('school-name-input');
             const schoolName = schoolNameInput.value.trim();
-
             if (schoolName) {
-                console.log(`Sending to Supabase: ${schoolName}`);
-
-                // الاتصال بـ Supabase لإضافة المدرسة إلى جدول 'schools'
-                const { data, error } = await supabase
-                    .from('schools')
-                    .insert([
-                        { name: schoolName }
-                    ])
-                    .select();
-
+                const { data, error } = await supabase.from('schools').insert([{ name: schoolName }]).select();
                 if (error) {
                     console.error('Error adding school:', error.message);
-                    alert('حدث خطأ أثناء إضافة المدرسة. يرجى المحاولة مرة أخرى.');
+                    alert('حدث خطأ أثناء إضافة المدرسة.');
                 } else {
-                    console.log('School added successfully:', data);
-                    // إضافة المدرسة إلى القائمة في الواجهة
-                    addSchoolToList(data[0].name);
+                    addSchoolToList(data[0]);
                     closeAddSchoolModal();
                 }
             }
         }
-        
-        // ... باقي دوال JavaScript كما هي ...
+
+        function addSchoolToList(school) {
+            const listContainer = document.getElementById('schools-list-container');
+            const noSchoolsMessage = document.getElementById('no-schools-message');
+            if (noSchoolsMessage) { noSchoolsMessage.remove(); }
+            const schoolItem = document.createElement('div');
+            schoolItem.className = 'school-item';
+            schoolItem.innerHTML = `<span>${school.name}</span>`;
+            listContainer.appendChild(schoolItem);
+        }
     </script>
 </body>
 </html>
