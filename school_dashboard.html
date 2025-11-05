@@ -78,7 +78,10 @@
                 <div class="section-header"><h2>إدارة المعلمين</h2><button id="add-teacher-btn" class="add-btn">+ إضافة معلم جديد</button></div>
                 <table class="data-table"><thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>إجراءات</th></tr></thead><tbody id="teachers-table-body"></tbody></table>
             </div>
-            <div id="students" class="tab-content"><h2>إدارة الطلاب</h2></div>
+            <div id="students" class="tab-content management-section">
+                <div class="section-header"><h2>إدارة الطلاب</h2><button id="add-student-btn" class="add-btn">+ إضافة طالب جديد</button></div>
+                <table class="data-table"><thead><tr><th>الاسم</th><th>الفصل</th><th>إجراءات</th></tr></thead><tbody id="students-table-body"></tbody></table>
+            </div>
             <div id="settings" class="tab-content"><h2>إعدادات المدرسة</h2></div>
         </main>
         <footer class="footer">© 2025 نظام الكابتن التعليمي. جميع الحقوق محفوظة.</footer>
@@ -139,6 +142,17 @@
             });
         }
 
+        async function loadStudents() {
+            if (!schoolId) return;
+            const { data: students, error } = await _supabase.from('students').select('*').eq('school_id', schoolId).order('created_at');
+            if (error) { console.error('Error loading students:', error); return; }
+            const tableBody = document.getElementById('students-table-body');
+            tableBody.innerHTML = '';
+            students.forEach(student => {
+                tableBody.innerHTML += `<tr><td>${student.name}</td><td>${student.class}</td><td><button>تعديل</button> <button>حذف</button></td></tr>`;
+            });
+        }
+
         document.getElementById('add-agent-btn').addEventListener('click', async () => {
             const { value: formValues } = await Swal.fire({ title: 'إضافة وكيل جديد', html: '<input id="swal-input1" class="swal2-input" placeholder="اسم الوكيل"><input id="swal-input2" class="swal2-input" placeholder="البريد الإلكتروني">', focusConfirm: false, preConfirm: () => [document.getElementById('swal-input1').value, document.getElementById('swal-input2').value] });
             if (formValues) {
@@ -163,6 +177,18 @@
             }
         });
 
+        document.getElementById('add-student-btn').addEventListener('click', async () => {
+            const { value: formValues } = await Swal.fire({ title: 'إضافة طالب جديد', html: '<input id="swal-input1" class="swal2-input" placeholder="اسم الطالب"><input id="swal-input2" class="swal2-input" placeholder="الفصل الدراسي">', focusConfirm: false, preConfirm: () => [document.getElementById('swal-input1').value, document.getElementById('swal-input2').value] });
+            if (formValues) {
+                const [name, className] = formValues;
+                if (name && className) {
+                    const { error } = await _supabase.from('students').insert([{ name, class: className, school_id: schoolId }]);
+                    if (error) { Swal.fire('خطأ!', `حدث خطأ: ${error.message}`, 'error'); }
+                    else { Swal.fire('تم!', 'تمت إضافة الطالب بنجاح.', 'success'); loadStudents(); loadDashboardStats(); }
+                }
+            }
+        });
+
         const tabLinks = document.querySelectorAll('.tab-link');
         const tabContents = document.querySelectorAll('.tab-content');
         tabLinks.forEach(link => {
@@ -175,6 +201,7 @@
                 document.getElementById(tabId).classList.add('active');
                 if (tabId === 'agents') loadAgents();
                 if (tabId === 'teachers') loadTeachers();
+                if (tabId === 'students') loadStudents();
             });
         });
 
