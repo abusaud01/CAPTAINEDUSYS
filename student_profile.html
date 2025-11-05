@@ -104,10 +104,10 @@
         let currentStudentName = '';
 
         async function logSchoolEvent(description) {
-            const { error } = await _supabase.from('school_events_log').insert([{ school_id: schoolId, description: description }]);
+            // **التصحيح الحاسم هنا: استخدام اسم الجدول الصحيح**
+            const { error } = await _supabase.from('school_events').insert([{ school_id: schoolId, description: description }]);
             if (error) {
                 console.error('Failed to log school event:', error);
-                // يمكنك إضافة تنبيه هنا إذا أردت
             }
         }
 
@@ -188,21 +188,18 @@
 
             if (violationId) {
                 const selectedViolation = violationTypes[violationId];
-                // **البداية: تنفيذ متسلسل**
                 const { error: behaviorError } = await _supabase.from('student_behavior_log').insert([{ student_id: studentId, school_id: schoolId, violation_type_id: violationId, description: selectedViolation.description, deduction_points: selectedViolation.points }]);
                 
                 if (behaviorError) {
                     console.error("Supabase error (behavior):", behaviorError);
                     Swal.fire('خطأ!', 'لم يتم تسجيل المخالفة.', 'error');
-                    return; // **إيقاف التنفيذ عند الفشل**
+                    return;
                 }
 
-                // **النجاح الأول، تنفيذ الثاني**
                 await logSchoolEvent(`تم تسجيل مخالفة "${selectedViolation.description}" للطالب: ${currentStudentName}`);
                 
-                // **النجاح الكامل، إظهار الرسالة وتحديث الواجهة**
                 Swal.fire('تم!', 'تم تسجيل المخالفة بنجاح.', 'success');
-                await loadBehaviorLogs(); // **التحديث بعد التأكد من النجاح**
+                await loadBehaviorLogs();
             }
         });
 
@@ -218,21 +215,18 @@
 
             if (praiseId) {
                 const selectedPraise = praiseTypes[praiseId];
-                // **البداية: تنفيذ متسلسل**
                 const { error: behaviorError } = await _supabase.from('student_behavior_log').insert([{ student_id: studentId, school_id: schoolId, praise_type_id: praiseId, description: selectedPraise.description, reward_points: selectedPraise.points }]);
 
                 if (behaviorError) {
                     console.error("Supabase error (behavior):", behaviorError);
                     Swal.fire('خطأ!', 'لم يتم تسجيل السلوك الإيجابي.', 'error');
-                    return; // **إيقاف التنفيذ عند الفشل**
+                    return;
                 }
 
-                // **النجاح الأول، تنفيذ الثاني**
                 await logSchoolEvent(`تم منح سلوك إيجابي "${selectedPraise.description}" للطالب: ${currentStudentName}`);
 
-                // **النجاح الكامل، إظهار الرسالة وتحديث الواجهة**
                 Swal.fire('تم!', 'تم تسجيل السلوك الإيجابي بنجاح.', 'success');
-                await loadBehaviorLogs(); // **التحديث بعد التأكد من النجاح**
+                await loadBehaviorLogs();
             }
         });
 
