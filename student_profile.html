@@ -101,6 +101,12 @@
 
         let violationTypes = {};
         let praiseTypes = {};
+        let currentStudentName = '';
+
+        // **الوظيفة الجديدة: تسجيل حدث في سجل المدرسة**
+        async function logSchoolEvent(description) {
+            await _supabase.from('school_events_log').insert([{ school_id: schoolId, description: description }]);
+        }
 
         function formatTimeAgo(date) {
             const seconds = Math.floor((new Date() - new Date(date)) / 1000);
@@ -130,7 +136,7 @@
 
             data.forEach(log => {
                 if (log.praise_type_id) {
-                    currentScore += log.reward_points; // **التصحيح هنا**
+                    currentScore += log.reward_points;
                     praisesLogEl.innerHTML += `
                         <div class="log-item">
                             <div>
@@ -140,7 +146,7 @@
                             <div class="log-item-points praise-points">+${log.reward_points}</div>
                         </div>`;
                 } else if (log.violation_type_id) {
-                    currentScore -= log.deduction_points; // **التصحيح هنا**
+                    currentScore -= log.deduction_points;
                     violationsLogEl.innerHTML += `
                         <div class="log-item">
                             <div>
@@ -163,6 +169,7 @@
             backToDashboardBtn.href = `school_dashboard.html?id=${schoolId}`;
             const { data: student, error } = await _supabase.from('students').select('name, class').eq('id', studentId).single();
             if (error) { console.error('Error fetching student:', error); return; }
+            currentStudentName = student.name; // تخزين اسم الطالب
             studentNameHeader.textContent = student.name;
             studentNameEl.textContent = student.name;
             studentClassEl.textContent = student.class;
@@ -199,14 +206,15 @@
             if (violationId) {
                 const selectedViolation = violationTypes[violationId];
                 const { error } = await _supabase.from('student_behavior_log').insert([
-                    { student_id: studentId, school_id: schoolId, violation_type_id: violationId, description: selectedViolation.description, deduction_points: selectedViolation.points } // **التصحيح هنا**
+                    { student_id: studentId, school_id: schoolId, violation_type_id: violationId, description: selectedViolation.description, deduction_points: selectedViolation.points }
                 ]);
                 if (error) {
                     console.error("Supabase error:", error);
                     Swal.fire('خطأ!', 'لم يتم تسجيل المخالفة.', 'error');
                 } else {
                     Swal.fire('تم!', 'تم تسجيل المخالفة بنجاح.', 'success');
-                    loadBehaviorLogs(); // Refresh logs
+                    await logSchoolEvent(`تم تسجيل مخالفة "${selectedViolation.description}" للطالب: ${currentStudentName}`); // **الإضافة هنا**
+                    loadBehaviorLogs();
                 }
             }
         });
@@ -230,14 +238,15 @@
             if (praiseId) {
                 const selectedPraise = praiseTypes[praiseId];
                 const { error } = await _supabase.from('student_behavior_log').insert([
-                    { student_id: studentId, school_id: schoolId, praise_type_id: praiseId, description: selectedPraise.description, reward_points: selectedPraise.points } // **التصحيح هنا**
+                    { student_id: studentId, school_id: schoolId, praise_type_id: praiseId, description: selectedPraise.description, reward_points: selectedPraise.points }
                 ]);
                 if (error) {
                     console.error("Supabase error:", error);
                     Swal.fire('خطأ!', 'لم يتم تسجيل السلوك الإيجابي.', 'error');
                 } else {
                     Swal.fire('تم!', 'تم تسجيل السلوك الإيجابي بنجاح.', 'success');
-                    loadBehaviorLogs(); // Refresh logs
+                    await logSchoolEvent(`تم منح سلوك إيجابي "${selectedPraise.description}" للطالب: ${currentStudentName}`); // **الإضافة هنا**
+                    loadBehaviorLogs();
                 }
             }
         });
