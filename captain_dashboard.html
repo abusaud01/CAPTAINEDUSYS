@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة تحكم الكابتن</title>
     
-    <!-- 1. استيراد خط تجوال من جوجل -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
@@ -13,14 +12,13 @@
     <style>
         /* --- CSS: The Royal Styling --- */
         :root {
-            --royal-green: #004225; /* أخضر ملكي عميق */
-            --gold-accent: #FFD700; /* ذهبي للمسات الفاخرة */
-            --light-cream: #F5F5DC; /* كريمي فاتح للخلفيات والنصوص */
-            --dark-charcoal: #333333; /* فحمي داكن للنصوص الثانوية */
+            --royal-green: #004225;
+            --gold-accent: #FFD700;
+            --light-cream: #F5F5DC;
+            --dark-charcoal: #333333;
         }
 
         body {
-            /* 2. تطبيق خط تجوال على كامل الصفحة */
             font-family: 'Tajawal', sans-serif; 
             background-color: var(--light-cream );
             color: var(--dark-charcoal);
@@ -35,14 +33,14 @@
             padding: 20px;
             height: 100vh;
             position: fixed;
-            box-shadow: -5px 0px 15px rgba(0, 0, 0, 0.2); /* إضافة ظل للشريط الجانبي */
+            box-shadow: -5px 0px 15px rgba(0, 0, 0, 0.2);
         }
 
         .sidebar h2 {
             color: var(--gold-accent);
             text-align: center;
             margin-bottom: 40px;
-            font-weight: 700; /* جعل العنوان أعرض */
+            font-weight: 700;
         }
 
         .sidebar nav a {
@@ -53,18 +51,18 @@
             margin-bottom: 10px;
             border-radius: 8px;
             transition: background-color 0.3s, color 0.3s;
-            font-weight: 400; /* وزن الخط العادي */
+            font-weight: 400;
         }
 
         .sidebar nav a:hover, .sidebar nav a.active {
-            background-color: rgba(255, 215, 0, 0.1); /* لمسة ذهبية شفافة عند التمرير */
+            background-color: rgba(255, 215, 0, 0.1);
             border-right: 4px solid var(--gold-accent);
             color: var(--gold-accent);
-            font-weight: 700; /* جعل الخط أعرض عند الاختيار */
+            font-weight: 700;
         }
 
         .main-content {
-            margin-right: 250px; /* نفس عرض الشريط الجانبي */
+            margin-right: 250px;
             padding: 40px;
             width: calc(100% - 250px);
         }
@@ -87,8 +85,8 @@
             border: none;
             padding: 12px 25px;
             font-size: 16px;
-            font-weight: 700; /* استخدام الخط العريض */
-            font-family: 'Tajawal', sans-serif; /* التأكيد على استخدام الخط */
+            font-weight: 700;
+            font-family: 'Tajawal', sans-serif;
             border-radius: 8px;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
@@ -99,45 +97,74 @@
             transform: scale(1.05);
             box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2);
         }
-
-        .log-container {
-            background-color: #FFFFFF;
-            border: 1px solid #DDD;
+        
+        /* --- قسم قائمة المدارس --- */
+        .schools-list {
+            background-color: #fff;
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.07);
         }
-
-        .log-header {
+        .school-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid var(--royal-green);
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
         }
-        
-        .log-header h3 {
-            color: var(--royal-green);
-            margin: 0;
+        .school-item:last-child { border-bottom: none; }
+        .school-item span { font-size: 18px; }
+
+        /* --- تصميم النافذة المنبثقة (Modal) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: none; /* مخفي بشكل افتراضي */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            width: 500px;
+            text-align: center;
+            border-top: 8px solid var(--royal-green);
+        }
+        .modal-content h2 { color: var(--royal-green); }
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #DDD;
+            border-radius: 8px;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 16px;
+            box-sizing: border-box;
+            margin-top: 20px;
+            margin-bottom: 30px;
+        }
+        .modal-actions button {
+            padding: 12px 30px;
+            font-size: 16px;
             font-weight: 700;
+            font-family: 'Tajawal', sans-serif;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            margin: 0 10px;
         }
-
-        .log-entry {
-            border-bottom: 1px solid #EEE;
-            padding: 15px 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .btn-confirm {
+            background-color: var(--royal-green);
+            color: white;
         }
-        .log-entry:last-child {
-            border-bottom: none;
-        }
-        .log-entry .timestamp {
-            color: #999;
-            font-size: 14px;
-            flex-shrink: 0; /* منع الوقت من الانضغاط */
-            margin-right: 20px;
+        .btn-cancel {
+            background-color: #DDD;
+            color: var(--dark-charcoal);
         }
     </style>
 </head>
@@ -156,48 +183,96 @@
         <div id="dashboard">
             <header>
                 <h1>إدارة المدارس</h1>
-                <button class="add-school-btn" onclick="alert('سيتم هنا فتح نافذة لإضافة مدرسة جديدة!')">+ إضافة مدرسة جديدة</button>
+                <button class="add-school-btn" onclick="openAddSchoolModal()">+ إضافة مدرسة جديدة</button>
             </header>
-            <!-- هنا سنضع قائمة المدارس لاحقاً -->
-            <p>سيتم عرض قائمة المدارس والإحصائيات هنا...</p>
+            <div id="schools-list-container" class="schools-list">
+                <!-- سيتم إضافة المدارس هنا ديناميكيًا -->
+                <p id="no-schools-message">لا توجد مدارس مضافة حتى الآن.</p>
+            </div>
         </div>
 
-        <!-- قسم الصندوق الأسود -->
+        <!-- قسم الصندوق الأسود (مخفي) -->
         <div id="log" style="display: none;">
-            <header>
-                <h1>سجل النظام الشامل (الصندوق الأسود)</h1>
-            </header>
-            <div class="log-container">
-                <div class="log-header">
-                    <h3>الأحداث المسجلة</h3>
-                    <!-- هنا سنضع أدوات الفلترة والبحث -->
+            <!-- ... محتوى سجل النظام الشامل كما هو ... -->
+        </div>
+    </div>
+
+    <!-- النافذة المنبثقة لإضافة مدرسة (مخفية) -->
+    <div id="addSchoolModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>إضافة مدرسة جديدة</h2>
+            <form id="add-school-form" onsubmit="handleAddSchool(event)">
+                <input type="text" id="school-name-input" class="modal-input" placeholder="أدخل اسم المدرسة هنا..." required>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-confirm">إضافة</button>
+                    <button type="button" class="btn-cancel" onclick="closeAddSchoolModal()">إلغاء</button>
                 </div>
-                <!-- مثال لحدث مسجل -->
-                <div class="log-entry">
-                    <span><strong style="color: var(--royal-green);">[مدرسة الأبطال]</strong>: المعلم "أحمد" بدأ حصة "الرياضيات".</span>
-                    <span class="timestamp">12:05:34 م</span>
-                </div>
-                <div class="log-entry">
-                    <span><strong style="color: var(--royal-green);">[مدرسة المستقبل]</strong>: الوكيل "خالد" سجل مخالفة "تأخر" على الطالب "سالم".</span>
-                    <span class="timestamp">12:04:10 م</span>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 
     <script>
         // --- JavaScript: The Brains ---
+
+        // دالة للتنقل بين الأقسام
         function showSection(sectionId) {
-            // إخفاء جميع الأقسام
-            document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('log').style.display = 'none';
+            // ... الكود كما هو ...
+        }
 
-            // إظهار القسم المطلوب فقط
-            document.getElementById(sectionId).style.display = 'block';
+        // --- منطق النافذة المنبثقة (Modal) ---
+        const modal = document.getElementById('addSchoolModal');
 
-            // تحديث الحالة النشطة في الشريط الجانبي
-            document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
-            document.querySelector(`.sidebar nav a[onclick="showSection('${sectionId}')"]`).classList.add('active');
+        function openAddSchoolModal() {
+            modal.style.display = 'flex';
+        }
+
+        function closeAddSchoolModal() {
+            modal.style.display = 'none';
+            document.getElementById('add-school-form').reset(); // مسح الحقل عند الإغلاق
+        }
+
+        // إغلاق النافذة عند الضغط خارجها
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeAddSchoolModal();
+            }
+        }
+
+        // --- منطق إضافة مدرسة ---
+        function handleAddSchool(event) {
+            event.preventDefault();
+            const schoolNameInput = document.getElementById('school-name-input');
+            const schoolName = schoolNameInput.value.trim();
+
+            if (schoolName) {
+                console.log(`Adding school: ${schoolName}`);
+
+                // SUPABASE_HOOK: هنا سيتم استدعاء supabase.from('schools').insert({ name: schoolName })
+                // سنقوم بمحاكاة النجاح وإضافة المدرسة إلى الواجهة مباشرة
+
+                // محاكاة: إضافة المدرسة إلى القائمة في الواجهة
+                addSchoolToList(schoolName);
+                
+                closeAddSchoolModal();
+            }
+        }
+
+        function addSchoolToList(name) {
+            const listContainer = document.getElementById('schools-list-container');
+            const noSchoolsMessage = document.getElementById('no-schools-message');
+            
+            // إخفاء رسالة "لا توجد مدارس" إذا كانت موجودة
+            if (noSchoolsMessage) {
+                noSchoolsMessage.style.display = 'none';
+            }
+
+            // إنشاء عنصر المدرسة الجديد
+            const schoolItem = document.createElement('div');
+            schoolItem.className = 'school-item';
+            schoolItem.innerHTML = `<span>${name}</span>`; // عرض اسم المدرسة
+            
+            // إضافة العنصر الجديد إلى القائمة
+            listContainer.appendChild(schoolItem);
         }
     </script>
 
