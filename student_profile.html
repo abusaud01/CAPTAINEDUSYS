@@ -16,7 +16,7 @@
         .header h1 { margin: 0; font-size: 28px; }
         .back-btn { background-color: transparent; border: 2px solid var(--gold-accent); color: var(--gold-accent); padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; transition: all 0.3s ease; }
         .back-btn:hover { background-color: var(--gold-accent); color: var(--royal-green); }
-        .main-container { padding: 40px; }
+        .main-container { padding: 40px; max-width: 1200px; margin: auto; }
         .profile-header { background-color: var(--white); padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
         .profile-info h2 { margin: 0 0 10px 0; font-size: 24px; color: var(--dark-charcoal); }
         .profile-info p { margin: 0; color: #555; }
@@ -30,11 +30,15 @@
         .add-violation { background-color: var(--danger-red); color: var(--white); }
         .log-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
         .log-section { background-color: var(--white); padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .log-section h3 { margin-top: 0; border-bottom: 1px solid var(--gray-border); padding-bottom: 15px; margin-bottom: 15px; }
-        .log-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+        .log-section h3 { margin-top: 0; border-bottom: 1px solid var(--gray-border); padding-bottom: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .log-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 5px; border-bottom: 1px solid #f0f0f0; }
         .log-item:last-child { border-bottom: none; }
-        .log-item-desc { color: var(--dark-charcoal); }
-        .log-item-meta { font-size: 12px; color: #888; }
+        .log-item-desc { color: var(--dark-charcoal); font-size: 15px; }
+        .log-item-meta { font-size: 12px; color: #888; text-align: left; }
+        .log-item-points { font-weight: 700; font-size: 16px; }
+        .praise-points { color: var(--success-green); }
+        .violation-points { color: var(--danger-red); }
+        .no-logs { text-align: center; color: #999; padding: 20px; }
         .footer { text-align: center; padding: 20px; margin-top: 40px; color: #777; font-size: 14px; }
     </style>
 </head>
@@ -53,7 +57,7 @@
             </div>
             <div class="behavior-score">
                 <h3>درجة السلوك</h3>
-                <p id="behaviorScore">100</p>
+                <p id="behaviorScore">80</p>
             </div>
         </div>
 
@@ -65,11 +69,11 @@
         <div class="log-container">
             <div class="log-section">
                 <h3><span style="color: var(--success-green);">✔</span> سجل الإيجابيات</h3>
-                <div id="praises-log"></div>
+                <div id="praises-log"><p class="no-logs">لا توجد إيجابيات مسجلة.</p></div>
             </div>
             <div class="log-section">
                 <h3><span style="color: var(--danger-red);">✖</span> سجل المخالفات</h3>
-                <div id="violations-log"></div>
+                <div id="violations-log"><p class="no-logs">لا توجد مخالفات مسجلة.</p></div>
             </div>
         </div>
     </div>
@@ -86,34 +90,164 @@
         const schoolId = params.get('school_id');
 
         const studentNameHeader = document.getElementById('studentNameHeader');
-        const studentName = document.getElementById('studentName');
-        const studentClass = document.getElementById('studentClass');
+        const studentNameEl = document.getElementById('studentName');
+        const studentClassEl = document.getElementById('studentClass');
         const backToDashboardBtn = document.getElementById('backToDashboard');
+        const behaviorScoreEl = document.getElementById('behaviorScore');
+        const praisesLogEl = document.getElementById('praises-log');
+        const violationsLogEl = document.getElementById('violations-log');
+        const addPraiseBtn = document.getElementById('add-praise-btn');
+        const addViolationBtn = document.getElementById('add-violation-btn');
+
+        let violationTypes = {};
+        let praiseTypes = {};
+
+        function formatTimeAgo(date) {
+            const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+            let interval = seconds / 31536000;
+            if (interval > 1) return `منذ ${Math.floor(interval)} سنة`;
+            interval = seconds / 2592000;
+            if (interval > 1) return `منذ ${Math.floor(interval)} شهر`;
+            interval = seconds / 86400;
+            if (interval > 1) return `منذ ${Math.floor(interval)} يوم`;
+            interval = seconds / 3600;
+            if (interval > 1) return `منذ ${Math.floor(interval)} ساعة`;
+            interval = seconds / 60;
+            if (interval > 1) return `منذ ${Math.floor(interval)} دقيقة`;
+            return `منذ ${Math.floor(seconds)} ثانية`;
+        }
+
+        async function loadBehaviorLogs() {
+            const { data, error } = await _supabase.from('student_behavior_log').select('*').eq('student_id', studentId).order('created_at', { ascending: false });
+            if (error) {
+                console.error('Error fetching behavior logs:', error);
+                return;
+            }
+
+            let currentScore = 80;
+            praisesLogEl.innerHTML = '';
+            violationsLogEl.innerHTML = '';
+
+            data.forEach(log => {
+                if (log.praise_type_id) {
+                    currentScore += log.points_awarded;
+                    praisesLogEl.innerHTML += `
+                        <div class="log-item">
+                            <div>
+                                <div class="log-item-desc">${log.description}</div>
+                                <div class="log-item-meta">${formatTimeAgo(log.created_at)}</div>
+                            </div>
+                            <div class="log-item-points praise-points">+${log.points_awarded}</div>
+                        </div>`;
+                } else if (log.violation_type_id) {
+                    currentScore -= log.points_deducted;
+                    violationsLogEl.innerHTML += `
+                        <div class="log-item">
+                            <div>
+                                <div class="log-item-desc">${log.description}</div>
+                                <div class="log-item-meta">${formatTimeAgo(log.created_at)}</div>
+                            </div>
+                            <div class="log-item-points violation-points">-${log.points_deducted}</div>
+                        </div>`;
+                }
+            });
+
+            if (praisesLogEl.innerHTML === '') praisesLogEl.innerHTML = '<p class="no-logs">لا توجد إيجابيات مسجلة.</p>';
+            if (violationsLogEl.innerHTML === '') violationsLogEl.innerHTML = '<p class="no-logs">لا توجد مخالفات مسجلة.</p>';
+            
+            behaviorScoreEl.textContent = currentScore;
+        }
 
         async function loadStudentProfile() {
             if (!studentId) return;
-
-            // Set back button URL
             backToDashboardBtn.href = `school_dashboard.html?id=${schoolId}`;
-
-            // Fetch student info
             const { data: student, error } = await _supabase.from('students').select('name, class').eq('id', studentId).single();
-            if (error) {
-                console.error('Error fetching student:', error);
-                return;
-            }
+            if (error) { console.error('Error fetching student:', error); return; }
             studentNameHeader.textContent = student.name;
-            studentName.textContent = student.name;
-            studentClass.textContent = student.class;
+            studentNameEl.textContent = student.name;
+            studentClassEl.textContent = student.class;
             document.title = `ملف الطالب: ${student.name} - نظام الكابتن`;
+            await loadBehaviorLogs();
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        async function fetchBehaviorTypes() {
+            const { data: violations, error: vError } = await _supabase.from('violation_types').select('*');
+            if (vError) console.error('Error fetching violations:', vError);
+            else violations.forEach(v => violationTypes[v.id] = { description: v.description, points: v.deduction_points });
+
+            const { data: praises, error: pError } = await _supabase.from('praise_types').select('*');
+            if (pError) console.error('Error fetching praises:', pError);
+            else praises.forEach(p => praiseTypes[p.id] = { description: p.description, points: p.reward_points });
+        }
+
+        addViolationBtn.addEventListener('click', async () => {
+            const inputOptions = Object.entries(violationTypes).reduce((acc, [id, {description, points}]) => {
+                acc[id] = `${description} (-${points} درجة)`;
+                return acc;
+            }, {});
+
+            const { value: violationId } = await Swal.fire({
+                title: 'تسجيل مخالفة جديدة',
+                input: 'select',
+                inputOptions,
+                inputPlaceholder: 'اختر نوع المخالفة',
+                showCancelButton: true,
+                confirmButtonText: 'تسجيل',
+                cancelButtonText: 'إلغاء',
+                customClass: { popup: 'swal-tajawal', }
+            });
+
+            if (violationId) {
+                const selectedViolation = violationTypes[violationId];
+                const { error } = await _supabase.from('student_behavior_log').insert([
+                    { student_id: studentId, school_id: schoolId, violation_type_id: violationId, description: selectedViolation.description, points_deducted: selectedViolation.points }
+                ]);
+                if (error) {
+                    Swal.fire('خطأ!', 'لم يتم تسجيل المخالفة.', 'error');
+                } else {
+                    Swal.fire('تم!', 'تم تسجيل المخالفة بنجاح.', 'success');
+                    loadBehaviorLogs(); // Refresh logs
+                }
+            }
+        });
+
+        addPraiseBtn.addEventListener('click', async () => {
+            const inputOptions = Object.entries(praiseTypes).reduce((acc, [id, {description, points}]) => {
+                acc[id] = `${description} (+${points} درجة)`;
+                return acc;
+            }, {});
+
+            const { value: praiseId } = await Swal.fire({
+                title: 'إضافة سلوك إيجابي',
+                input: 'select',
+                inputOptions,
+                inputPlaceholder: 'اختر نوع السلوك الإيجابي',
+                showCancelButton: true,
+                confirmButtonText: 'إضافة',
+                cancelButtonText: 'إلغاء',
+            });
+
+            if (praiseId) {
+                const selectedPraise = praiseTypes[praiseId];
+                const { error } = await _supabase.from('student_behavior_log').insert([
+                    { student_id: studentId, school_id: schoolId, praise_type_id: praiseId, description: selectedPraise.description, points_awarded: selectedPraise.points }
+                ]);
+                if (error) {
+                    Swal.fire('خطأ!', 'لم يتم تسجيل السلوك الإيجابي.', 'error');
+                } else {
+                    Swal.fire('تم!', 'تم تسجيل السلوك الإيجابي بنجاح.', 'success');
+                    loadBehaviorLogs(); // Refresh logs
+                }
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', async () => {
             if (!studentId || !schoolId) {
                 document.body.innerHTML = '<h1>خطأ: لم يتم تحديد الطالب أو المدرسة.</h1>';
                 return;
             }
-            loadStudentProfile();
+            await fetchBehaviorTypes();
+            await loadStudentProfile();
         });
     </script>
 
