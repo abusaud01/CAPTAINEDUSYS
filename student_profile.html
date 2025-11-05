@@ -103,7 +103,6 @@
         let praiseTypes = {};
         let currentStudentName = '';
 
-        // --- الإصلاح النهائي: إزالة الحقل الزائد ---
         async function logSchoolEvent(description) {
             const { error } = await _supabase.from('school_events').insert([{ school_id: schoolId, description: description }]);
             if (error) {
@@ -127,16 +126,24 @@
             return `منذ ${Math.floor(seconds)} ثانية`;
         }
 
+        // --- التعديل الحاسم: استخدام الدالة بدلاً من SELECT ---
         async function loadBehaviorLogs() {
-            const { data, error } = await _supabase.from('student_behavior_log').select('*').eq('student_id', studentId).order('created_at', { ascending: false });
+            const { data, error } = await _supabase.rpc('get_student_logs', { p_student_id: studentId });
+
             if (error) {
-                console.error('Error fetching behavior logs:', error);
+                console.error('Error fetching behavior logs via RPC:', error);
+                // عرض خطأ للمستخدم هنا إذا أردت
+                praisesLogEl.innerHTML = `<p class="no-logs" style="color:red;">خطأ في تحميل السجلات: ${error.message}</p>`;
+                violationsLogEl.innerHTML = `<p class="no-logs" style="color:red;">يرجى التحقق من صلاحيات القراءة.</p>`;
                 return;
             }
 
             let currentScore = 80;
             praisesLogEl.innerHTML = '';
             violationsLogEl.innerHTML = '';
+
+            // فرز البيانات حسب التاريخ (الأحدث أولاً) لأن الدالة لا تضمن الترتيب
+            data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
             data.forEach(log => {
                 if (log.praise_type_id) {
