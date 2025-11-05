@@ -130,24 +130,24 @@
 
             data.forEach(log => {
                 if (log.praise_type_id) {
-                    currentScore += log.points_awarded;
+                    currentScore += log.reward_points; // **التصحيح هنا**
                     praisesLogEl.innerHTML += `
                         <div class="log-item">
                             <div>
                                 <div class="log-item-desc">${log.description}</div>
                                 <div class="log-item-meta">${formatTimeAgo(log.created_at)}</div>
                             </div>
-                            <div class="log-item-points praise-points">+${log.points_awarded}</div>
+                            <div class="log-item-points praise-points">+${log.reward_points}</div>
                         </div>`;
                 } else if (log.violation_type_id) {
-                    currentScore -= log.points_deducted;
+                    currentScore -= log.deduction_points; // **التصحيح هنا**
                     violationsLogEl.innerHTML += `
                         <div class="log-item">
                             <div>
                                 <div class="log-item-desc">${log.description}</div>
                                 <div class="log-item-meta">${formatTimeAgo(log.created_at)}</div>
                             </div>
-                            <div class="log-item-points violation-points">-${log.points_deducted}</div>
+                            <div class="log-item-points violation-points">-${log.deduction_points}</div>
                         </div>`;
                 }
             });
@@ -194,15 +194,15 @@
                 showCancelButton: true,
                 confirmButtonText: 'تسجيل',
                 cancelButtonText: 'إلغاء',
-                customClass: { popup: 'swal-tajawal', }
             });
 
             if (violationId) {
                 const selectedViolation = violationTypes[violationId];
                 const { error } = await _supabase.from('student_behavior_log').insert([
-                    { student_id: studentId, school_id: schoolId, violation_type_id: violationId, description: selectedViolation.description, points_deducted: selectedViolation.points }
+                    { student_id: studentId, school_id: schoolId, violation_type_id: violationId, description: selectedViolation.description, deduction_points: selectedViolation.points } // **التصحيح هنا**
                 ]);
                 if (error) {
+                    console.error("Supabase error:", error);
                     Swal.fire('خطأ!', 'لم يتم تسجيل المخالفة.', 'error');
                 } else {
                     Swal.fire('تم!', 'تم تسجيل المخالفة بنجاح.', 'success');
@@ -230,9 +230,10 @@
             if (praiseId) {
                 const selectedPraise = praiseTypes[praiseId];
                 const { error } = await _supabase.from('student_behavior_log').insert([
-                    { student_id: studentId, school_id: schoolId, praise_type_id: praiseId, description: selectedPraise.description, points_awarded: selectedPraise.points }
+                    { student_id: studentId, school_id: schoolId, praise_type_id: praiseId, description: selectedPraise.description, reward_points: selectedPraise.points } // **التصحيح هنا**
                 ]);
                 if (error) {
+                    console.error("Supabase error:", error);
                     Swal.fire('خطأ!', 'لم يتم تسجيل السلوك الإيجابي.', 'error');
                 } else {
                     Swal.fire('تم!', 'تم تسجيل السلوك الإيجابي بنجاح.', 'success');
