@@ -21,11 +21,11 @@
         .add-school-btn { background-color: var(--gold-accent); color: var(--dark-charcoal); border: none; padding: 12px 25px; border-radius: 8px; font-family: 'Tajawal', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; transition: background-color 0.3s, transform 0.2s; }
         .add-school-btn:hover { background-color: #e6c300; transform: translateY(-2px); }
         .schools-list { background-color: var(--white); border-radius: 8px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); }
-        .school-item { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid var(--gray-border); }
+        /* **التعديل:** تحويل العنصر إلى رابط */
+        .school-item { display: block; padding: 20px; border-bottom: 1px solid var(--gray-border); text-decoration: none; color: var(--dark-charcoal); font-size: 18px; transition: background-color 0.2s; }
         .school-item:last-child { border-bottom: none; }
-        .school-item span { font-size: 18px; color: var(--dark-charcoal); }
+        .school-item:hover { background-color: var(--light-gray); }
         #loading-state { text-align: center; padding: 40px; font-size: 18px; color: #777; }
-        /* **إعادة بناء الـ Modal** */
         .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--modal-backdrop); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: var(--white); padding: 30px 40px; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); width: 450px; text-align: center; }
         .modal-content h3 { margin-top: 0; margin-bottom: 20px; color: var(--royal-green); font-size: 22px; }
@@ -39,7 +39,6 @@
     </style>
 </head>
 <body>
-    <!-- الهيكل الأساسي للصفحة -->
     <div class="sidebar">
         <h2>نظام <span style="color: var(--gold-accent);">الكابتن</span></h2>
         <nav>
@@ -56,8 +55,6 @@
             <div id="loading-state">جاري تحميل المدارس...</div>
         </div>
     </div>
-
-    <!-- **هيكل الـ Modal الجميل** -->
     <div class="modal-backdrop" id="addSchoolModal">
         <div class="modal-content">
             <h3>نظام الكابتن التعليمي يقول لك</h3>
@@ -77,8 +74,6 @@
         const schoolsListDiv = document.getElementById('schoolsList');
         const loadingStateDiv = document.getElementById('loading-state');
         const addSchoolBtn = document.getElementById('addSchoolBtn');
-        
-        // عناصر الـ Modal
         const modal = document.getElementById('addSchoolModal');
         const schoolNameInput = document.getElementById('schoolNameInput');
         const saveSchoolBtn = document.getElementById('saveSchoolBtn');
@@ -104,17 +99,18 @@
             } else {
                 schoolsListDiv.innerHTML = '';
                 schools.forEach(school => {
-                    const schoolDiv = document.createElement('div');
-                    schoolDiv.className = 'school-item';
-                    schoolDiv.innerHTML = `<span>${school.name}</span>`;
-                    schoolsListDiv.appendChild(schoolDiv);
+                    // **التعديل:** إنشاء رابط لكل مدرسة
+                    const schoolLink = document.createElement('a');
+                    schoolLink.className = 'school-item';
+                    schoolLink.href = `school_dashboard.html?id=${school.id}`; // **الأهم:** تمرير الـ ID
+                    schoolLink.textContent = school.name;
+                    schoolsListDiv.appendChild(schoolLink);
                 });
             }
         }
 
-        // **المنطق الجديد للـ Modal**
         function openModal() {
-            schoolNameInput.value = ''; // تفريغ الحقل عند الفتح
+            schoolNameInput.value = '';
             modal.style.display = 'flex';
             schoolNameInput.focus();
         }
@@ -143,7 +139,6 @@
         addSchoolBtn.addEventListener('click', openModal);
         cancelBtn.addEventListener('click', closeModal);
         saveSchoolBtn.addEventListener('click', handleSaveSchool);
-        // إغلاق النافذة عند الضغط خارجها
         modal.addEventListener('click', (event) => {
             if (event.target === modal) {
                 closeModal();
