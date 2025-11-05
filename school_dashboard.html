@@ -6,91 +6,28 @@
     <title>لوحة تحكم المدرسة - نظام الكابتن</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* ... نفس كود التصميم السابق ... */
-        :root { --royal-green: #004225; --gold-accent: #FFD700; --light-cream: #F5F5DC; --dark-charcoal: #333333; --white: #FFFFFF; --light-gray: #f8f9fa; --gray-border: #dee2e6; }
-        body { font-family: 'Tajawal', sans-serif; background-color: var(--light-cream ); margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        .sidebar { width: 260px; background-color: var(--royal-green); color: var(--white); display: flex; flex-direction: column; box-shadow: -5px 0 15px rgba(0,0,0,0.1); z-index: 10; }
-        .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255, 215, 0, 0.2); }
-        .sidebar-header h2 { margin: 0; color: var(--gold-accent); font-size: 26px; }
-        .sidebar nav { flex-grow: 1; padding: 20px 0; }
-        .sidebar nav a { color: var(--white); text-decoration: none; padding: 15px 25px; display: flex; align-items: center; gap: 15px; margin: 0 10px 10px 10px; border-radius: 8px; transition: background-color 0.3s, color 0.3s; font-weight: 500; }
-        .sidebar nav a.active, .sidebar nav a:hover { background-color: var(--light-cream); color: var(--royal-green); }
-        .sidebar-footer { padding: 20px; border-top: 1px solid rgba(255, 215, 0, 0.2); margin-top: auto; }
-        .back-btn { display: block; text-align: center; background-color: transparent; border: 2px solid var(--gold-accent); color: var(--gold-accent); padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 700; transition: all 0.3s ease; }
-        .back-btn:hover { background-color: var(--gold-accent); color: var(--royal-green); transform: scale(1.05); }
-        .main-content { flex-grow: 1; display: flex; flex-direction: column; }
-        .header { background-color: var(--white); padding: 20px 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 5; }
-        h1 { color: var(--dark-charcoal); display: flex; align-items: center; gap: 15px; font-size: 28px; margin: 0; }
-        #schoolName { color: var(--royal-green); font-weight: 700; }
-        .content-body { flex-grow: 1; padding: 40px; overflow-y: auto; }
-        .tab-content { display: none; animation: fadeIn 0.5s; }
-        .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .footer { text-align: center; padding: 15px; background-color: #e9e9e2; color: #777; font-size: 14px; border-top: 1px solid #ddd; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px; margin-bottom: 40px; }
-        .stat-card { background-color: var(--white); padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 20px; }
-        .stat-card .icon { font-size: 40px; color: var(--royal-green); }
-        .stat-card .info h3 { margin: 0 0 5px 0; color: #555; font-size: 16px; }
-        .stat-card .info p { margin: 0; color: var(--dark-charcoal); font-size: 28px; font-weight: 700; }
-        .activity-feed, .management-section { background-color: var(--white); padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .section-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--gray-border); padding-bottom: 15px; margin-bottom: 20px; }
-        .section-header h2 { margin: 0; }
-        .add-btn { background-color: var(--gold-accent); color: var(--royal-green); border: none; padding: 10px 20px; border-radius: 5px; font-weight: 700; cursor: pointer; transition: background-color 0.3s; }
-        .add-btn:hover { background-color: #e6c300; }
-        .data-table { width: 100%; border-collapse: collapse; }
-        .data-table th, .data-table td { padding: 12px; text-align: right; border-bottom: 1px solid #f0f0f0; }
-        .data-table th { background-color: #f9f9f9; }
-        .data-table a { color: var(--royal-green); text-decoration: none; font-weight: 700; }
-        .data-table a:hover { text-decoration: underline; }
-        .activity-list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
-        .activity-list-item:last-child { border-bottom: none; }
-        .activity-description { display: flex; align-items: center; gap: 10px; }
-        .activity-time { font-size: 12px; color: #888; }
+        :root { --royal-green: #004225; --gold-accent: #FFD700; --light-cream: #F5F5DC; --dark-charcoal: #333333; --white: #FFFFFF; }
+        body { font-family: 'Tajawal', sans-serif; background-color: var(--light-cream ); margin: 0; display: flex; height: 100vh; }
+        .sidebar { width: 250px; background-color: var(--royal-green); color: var(--white); padding: 20px; }
+        .main-content { flex-grow: 1; padding: 40px; }
+        h1 { color: var(--dark-charcoal); }
+        #schoolName { color: var(--royal-green); }
+        a { color: var(--royal-green); }
     </style>
 </head>
 <body>
     <div class="sidebar">
-        <div class="sidebar-header"><h2 id="schoolNameAbbr">نظام الكابتن</h2></div>
+        <h2>نظام <span style="color: var(--gold-accent);">الكابتن</span></h2>
         <nav>
-            <a href="#" class="tab-link active" data-tab="dashboard"><span>🏠</span><span>لوحة القيادة</span></a>
-            <a href="#" class="tab-link" data-tab="agents"><span>👥</span><span>الوكلاء</span></a>
-            <a href="#" class="tab-link" data-tab="teachers"><span>🧑‍🏫</span><span>المعلمون</span></a>
-            <a href="#" class="tab-link" data-tab="students"><span>🎓</span><span>الطلاب</span></a>
-            <a href="#" class="tab-link" data-tab="settings"><span>⚙️</span><span>الإعدادات</span></a>
+            <a href="captain_dashboard.html">العودة إلى لوحة الإدارة</a>
         </nav>
-        <div class="sidebar-footer"><a href="captain_dashboard.html" class="back-btn"><span>«</span> كل المدارس</a></div>
     </div>
     <div class="main-content">
-        <header class="header"><h1><span>🏫</span><span>لوحة التحكم الخاصة بمدرسة: <span id="schoolName">...</span></span></h1></header>
-        <main class="content-body">
-            <div id="dashboard" class="tab-content active">
-                <div class="stats-grid">
-                    <div class="stat-card"><span class="icon">👥</span><div class="info"><h3>الوكلاء</h3><p id="agents-count">...</p></div></div>
-                    <div class="stat-card"><span class="icon">🧑‍🏫</span><div class="info"><h3>المعلمون</h3><p id="teachers-count">...</p></div></div>
-                    <div class="stat-card"><span class="icon">🎓</span><div class="info"><h3>الطلاب</h3><p id="students-count">...</p></div></div>
-                    <div class="stat-card"><span class="icon">⚠️</span><div class="info"><h3>المخالفات اليوم</h3><p>0</p></div></div>
-                </div>
-                <div class="activity-feed"><h2>آخر الأحداث</h2><div id="activity-list"></div></div>
-            </div>
-            <div id="agents" class="tab-content management-section">
-                <div class="section-header"><h2>إدارة الوكلاء</h2><button id="add-agent-btn" class="add-btn">+ إضافة وكيل جديد</button></div>
-                <table class="data-table"><thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>إجراءات</th></tr></thead><tbody id="agents-table-body"></tbody></table>
-            </div>
-            <div id="teachers" class="tab-content management-section">
-                <div class="section-header"><h2>إدارة المعلمين</h2><button id="add-teacher-btn" class="add-btn">+ إضافة معلم جديد</button></div>
-                <table class="data-table"><thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>إجراءات</th></tr></thead><tbody id="teachers-table-body"></tbody></table>
-            </div>
-            <div id="students" class="tab-content management-section">
-                <div class="section-header"><h2>إدارة الطلاب</h2><button id="add-student-btn" class="add-btn">+ إضافة طالب جديد</button></div>
-                <table class="data-table"><thead><tr><th>الاسم</th><th>الفصل</th><th>إجراءات</th></tr></thead><tbody id="students-table-body"></tbody></table>
-            </div>
-            <div id="settings" class="tab-content"><h2>إعدادات المدرسة</h2></div>
-        </main>
-        <footer class="footer">© 2025 نظام الكابتن التعليمي. جميع الحقوق محفوظة.</footer>
+        <h1>لوحة التحكم الخاصة بـ: <span id="schoolName">جاري التحميل...</span></h1>
+        <p>هنا ستظهر لوحة التحكم الخاصة بالمدرسة المحددة.</p>
     </div>
 
     <script>
@@ -99,140 +36,35 @@
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey );
 
         const schoolNameSpan = document.getElementById('schoolName');
-        const schoolNameAbbrSpan = document.getElementById('schoolNameAbbr');
-        const agentsCountSpan = document.getElementById('agents-count');
-        const teachersCountSpan = document.getElementById('teachers-count');
-        const studentsCountSpan = document.getElementById('students-count');
-        const activityListDiv = document.getElementById('activity-list');
-        const params = new URLSearchParams(window.location.search);
-        const schoolId = params.get('id');
 
-        async function logEvent(eventType, description) {
-            await _supabase.from('school_events').insert([{ school_id: schoolId, event_type: eventType, description: description }]);
-            loadActivityFeed();
-        }
+        // **الوظيفة الجديدة:** قراءة الـ ID من الرابط وجلب بيانات المدرسة
+        async function loadSchoolData() {
+            const params = new URLSearchParams(window.location.search);
+            const schoolId = params.get('id');
 
-        async function loadActivityFeed() {
-            if (!schoolId) return;
-            const { data: events, error } = await _supabase.from('school_events').select('*').eq('school_id', schoolId).order('created_at', { ascending: false }).limit(5);
-            if (error) { console.error('Error loading events:', error); return; }
-            activityListDiv.innerHTML = '';
-            events.forEach(event => {
-                const eventTime = new Date(event.created_at).toLocaleString('ar-SA');
-                activityListDiv.innerHTML += `<div class="activity-list-item"><div class="activity-description"><span>${event.description}</span></div><span class="activity-time">${eventTime}</span></div>`;
-            });
-        }
+            if (!schoolId) {
+                schoolNameSpan.textContent = "خطأ: لم يتم تحديد المدرسة.";
+                return;
+            }
 
-        async function loadDashboardStats() {
-            if (!schoolId) return;
-            const { count: agentsCount } = await _supabase.from('agents').select('*', { count: 'exact', head: true }).eq('school_id', schoolId);
-            agentsCountSpan.textContent = agentsCount ?? 0;
-            const { count: teachersCount } = await _supabase.from('teachers').select('*', { count: 'exact', head: true }).eq('school_id', schoolId);
-            teachersCountSpan.textContent = teachersCount ?? 0;
-            const { count: studentsCount } = await _supabase.from('students').select('*', { count: 'exact', head: true }).eq('school_id', schoolId);
-            studentsCountSpan.textContent = studentsCount ?? 0;
-        }
+            const { data: school, error } = await _supabase
+                .from('schools')
+                .select('name')
+                .eq('id', schoolId)
+                .single(); // .single() لجلب سجل واحد فقط
 
-        async function loadSchoolName() {
-            if (!schoolId) { schoolNameSpan.textContent = "خطأ"; return; }
-            const { data: school } = await _supabase.from('schools').select('name').eq('id', schoolId).single();
-            if (school) {
+            if (error) {
+                console.error('Error fetching school data:', error);
+                schoolNameSpan.textContent = "خطأ في تحميل بيانات المدرسة.";
+            } else if (school) {
                 schoolNameSpan.textContent = school.name;
-                schoolNameAbbrSpan.textContent = school.name;
-                document.title = `لوحة تحكم ${school.name} - نظام الكابتن`;
+                document.title = `لوحة تحكم ${school.name} - نظام الكابتن`; // تحديث عنوان الصفحة
+            } else {
+                schoolNameSpan.textContent = "المدرسة غير موجودة.";
             }
         }
 
-        async function loadAgents() {
-            if (!schoolId) return;
-            const { data: agents, error } = await _supabase.from('agents').select('*').eq('school_id', schoolId).order('created_at');
-            if (error) { console.error('Error loading agents:', error); return; }
-            const tableBody = document.getElementById('agents-table-body');
-            tableBody.innerHTML = '';
-            agents.forEach(agent => {
-                tableBody.innerHTML += `<tr><td>${agent.name}</td><td>${agent.email}</td><td><button>تعديل</button> <button>حذف</button></td></tr>`;
-            });
-        }
-
-        async function loadTeachers() {
-            if (!schoolId) return;
-            const { data: teachers, error } = await _supabase.from('teachers').select('*').eq('school_id', schoolId).order('created_at');
-            if (error) { console.error('Error loading teachers:', error); return; }
-            const tableBody = document.getElementById('teachers-table-body');
-            tableBody.innerHTML = '';
-            teachers.forEach(teacher => {
-                tableBody.innerHTML += `<tr><td>${teacher.name}</td><td>${teacher.email}</td><td><button>تعديل</button> <button>حذف</button></td></tr>`;
-            });
-        }
-
-        async function loadStudents() {
-            if (!schoolId) return;
-            const { data: students, error } = await _supabase.from('students').select('*').eq('school_id', schoolId).order('created_at');
-            if (error) { console.error('Error loading students:', error); return; }
-            const tableBody = document.getElementById('students-table-body');
-            tableBody.innerHTML = '';
-            students.forEach(student => {
-                tableBody.innerHTML += `<tr><td><a href="student_profile.html?id=${student.id}&school_id=${schoolId}">${student.name}</a></td><td>${student.class}</td><td><button>تعديل</button> <button>حذف</button></td></tr>`;
-            });
-        }
-
-        document.getElementById('add-agent-btn').addEventListener('click', async () => {
-            const { value: formValues } = await Swal.fire({ title: 'إضافة وكيل جديد', html: '<input id="swal-input1" class="swal2-input" placeholder="اسم الوكيل"><input id="swal-input2" class="swal2-input" placeholder="البريد الإلكتروني">', focusConfirm: false, preConfirm: () => [document.getElementById('swal-input1').value, document.getElementById('swal-input2').value] });
-            if (formValues) {
-                const [name, email] = formValues;
-                if (name && email) {
-                    const { error } = await _supabase.from('agents').insert([{ name, email, school_id: schoolId }]);
-                    if (error) { Swal.fire('خطأ!', `حدث خطأ: ${error.message}`, 'error'); } 
-                    else { Swal.fire('تم!', 'تمت إضافة الوكيل بنجاح.', 'success'); loadAgents(); loadDashboardStats(); logEvent('ADD_AGENT', `تمت إضافة الوكيل: ${name}`); }
-                }
-            }
-        });
-
-        document.getElementById('add-teacher-btn').addEventListener('click', async () => {
-            const { value: formValues } = await Swal.fire({ title: 'إضافة معلم جديد', html: '<input id="swal-input1" class="swal2-input" placeholder="اسم المعلم"><input id="swal-input2" class="swal2-input" placeholder="البريد الإلكتروني">', focusConfirm: false, preConfirm: () => [document.getElementById('swal-input1').value, document.getElementById('swal-input2').value] });
-            if (formValues) {
-                const [name, email] = formValues;
-                if (name && email) {
-                    const { error } = await _supabase.from('teachers').insert([{ name, email, school_id: schoolId }]);
-                    if (error) { Swal.fire('خطأ!', `حدث خطأ: ${error.message}`, 'error'); }
-                    else { Swal.fire('تم!', 'تمت إضافة المعلم بنجاح.', 'success'); loadTeachers(); loadDashboardStats(); logEvent('ADD_TEACHER', `تمت إضافة المعلم: ${name}`); }
-                }
-            }
-        });
-
-        document.getElementById('add-student-btn').addEventListener('click', async () => {
-            const { value: formValues } = await Swal.fire({ title: 'إضافة طالب جديد', html: '<input id="swal-input1" class="swal2-input" placeholder="اسم الطالب"><input id="swal-input2" class="swal2-input" placeholder="الفصل الدراسي">', focusConfirm: false, preConfirm: () => [document.getElementById('swal-input1').value, document.getElementById('swal-input2').value] });
-            if (formValues) {
-                const [name, className] = formValues;
-                if (name && className) {
-                    const { error } = await _supabase.from('students').insert([{ name, class: className, school_id: schoolId }]);
-                    if (error) { Swal.fire('خطأ!', `حدث خطأ: ${error.message}`, 'error'); }
-                    else { Swal.fire('تم!', 'تمت إضافة الطالب بنجاح.', 'success'); loadStudents(); loadDashboardStats(); logEvent('ADD_STUDENT', `تمت إضافة الطالب: ${name}`); }
-                }
-            }
-        });
-
-        const tabLinks = document.querySelectorAll('.tab-link');
-        const tabContents = document.querySelectorAll('.tab-content');
-        tabLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                tabLinks.forEach(l => l.classList.remove('active'));
-                tabContents.forEach(c => c.classList.remove('active'));
-                link.classList.add('active');
-                const tabId = link.getAttribute('data-tab');
-                document.getElementById(tabId).classList.add('active');
-                if (tabId === 'agents') loadAgents();
-                if (tabId === 'teachers') loadTeachers();
-                if (tabId === 'students') loadStudents();
-            });
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            loadSchoolName();
-            loadDashboardStats();
-            loadActivityFeed();
-        });
+        document.addEventListener('DOMContentLoaded', loadSchoolData);
     </script>
 </body>
 </html>
