@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- الإصدار الذهبي النهائي v25.0 - school_dashboard.html -->
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -10,6 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+        /* نفس الـ CSS من الإصدار السابق */
         :root { --royal-green: #004225; --gold-accent: #FFD700; --light-cream: #F5F5DC; --dark-charcoal: #333333; --white: #FFFFFF; --light-gray: #f8f9fa; --gray-border: #dee2e6; }
         body { font-family: 'Tajawal', sans-serif; background-color: var(--light-cream ); margin: 0; color: var(--dark-charcoal); }
         .container { max-width: 1200px; margin: 20px auto; padding: 20px; }
@@ -30,12 +32,10 @@
     </style>
 </head>
 <body>
-
     <div class="container">
         <div class="header">
             <h1 id="schoolNameHeader">لوحة التحكم الخاصة بمدرسة: ...</h1>
         </div>
-
         <div class="section">
             <h2>إضافة وكيل جديد</h2>
             <form id="addAgentForm">
@@ -56,30 +56,18 @@
                 <button type="submit" class="btn" style="margin-top: 20px;">إضافة الوكيل</button>
             </form>
         </div>
-
         <div class="section">
             <h2>قائمة الوكلاء</h2>
             <div class="table-container">
                 <table id="agentsTable">
-                    <thead>
-                        <tr>
-                            <th>الاسم</th>
-                            <th>البريد الإلكتروني</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- سيتم ملء البيانات هنا بواسطة JavaScript -->
-                    </tbody>
+                    <thead><tr><th>الاسم</th><th>البريد الإلكتروني</th></tr></thead>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
     </div>
 
     <script>
-        // =================================================================
-        // الكود الذهبي الكامل - v24.0 - school_dashboard.html
-        // =================================================================
-
         const supabaseUrl = 'https://xpeubmofhyoqupsjfalq.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZXVibW9maHlvcXVwc2pmYWxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyNTM3NzgsImV4cCI6MjA3NzgyOTc3OH0.A7zvw6etTDGe-WhWCisvtYcxy_JANWSBW1r3XOh2LVA';
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey );
@@ -87,115 +75,53 @@
         const params = new URLSearchParams(window.location.search);
         const schoolId = params.get('id');
 
-        const schoolNameHeader = document.getElementById('schoolNameHeader');
-        const addAgentForm = document.getElementById('addAgentForm');
-        const agentsTableBody = document.querySelector('#agentsTable tbody');
-
-        // --- دالة إنشاء الوكيل الجديدة والمحسنة ---
-        async function createNewAgent(email, password, fullName, currentSchoolId) {
-            if (!email || !password || !fullName || !currentSchoolId) {
-                Swal.fire('خطأ في البيانات', 'يرجى ملء جميع الحقول المطلوبة.', 'error');
-                return;
-            }
-
-            // الخطوة 1: إنشاء المستخدم في نظام المصادقة (auth.users)
-            // ملاحظة هامة: signUp يقوم بتسجيل دخول المستخدم الجديد تلقائيًا، مما يجعل الطلب التالي مصادقًا.
-            const { data: authData, error: authError } = await _supabase.auth.signUp({
-                email: email,
-                password: password
+        // --- دالة استدعاء دالة الحافة الجديدة ---
+        async function createAgentViaFunction(email, password, fullName, currentSchoolId) {
+            const { data, error } = await _supabase.functions.invoke('create-agent', {
+                body: { email, password, fullName, schoolId: currentSchoolId },
             });
 
-            if (authError) {
-                console.error('Error during sign up:', authError);
-                Swal.fire('فشل إنشاء الحساب', `لم يتم إنشاء حساب المصادقة. السبب: ${authError.message}`, 'error');
-                return;
-            }
-
-            if (authData.user && authData.user.id) {
-                console.log('Authentication user created successfully with ID:', authData.user.id);
-
-                // الخطوة 2: بعد نجاح الخطوة 1، قم بإضافة السجل في جدول agents
-                const { error: agentError } = await _supabase
-                    .from('agents')
-                    .insert([{
-                        id: authData.user.id,
-                        name: fullName,
-                        school_id: currentSchoolId,
-                        email: email
-                    }]);
-
-                if (agentError) {
-                    console.error('Error inserting into agents table:', agentError);
-                    Swal.fire('فشل ربط الوكيل', `تم إنشاء الحساب ولكن فشل ربطه بالمدرسة. السبب: ${agentError.message}`, 'error');
-                    // يجب التفكير في كيفية معالجة هذا "المستخدم اليتيم" لاحقًا
-                    return;
-                }
-
-                console.log('Agent profile created and linked successfully!');
-                Swal.fire('نجاح!', 'تم إنشاء الوكيل وربطه بالمدرسة بنجاح.', 'success').then(() => {
-                    location.reload(); // إعادة تحميل الصفحة لإظهار الوكيل الجديد في القائمة
-                });
-
-            } else {
-                console.error('Sign up seemed to succeed but no user data was returned.');
-                Swal.fire('خطأ غير متوقع', 'نجحت عملية التسجيل ولكن لم يتم إرجاع بيانات المستخدم.', 'error');
-            }
-        }
-
-        // --- دالة لجلب وعرض الوكلاء ---
-        async function loadAgents() {
-            if (!schoolId) return;
-            const { data: agents, error } = await _supabase
-                .from('agents')
-                .select('name, email')
-                .eq('school_id', schoolId);
-
             if (error) {
-                console.error('Error fetching agents:', error);
-                agentsTableBody.innerHTML = `<tr><td colspan="2">خطأ في تحميل قائمة الوكلاء.</td></tr>`;
+                console.error('Error invoking edge function:', error);
+                Swal.fire('فشل استدعاء الدالة', `لم يتم إنشاء الوكيل. السبب: ${error.message}`, 'error');
                 return;
             }
+            
+            if (data.error) {
+                 console.error('Error from inside edge function:', data.error);
+                 Swal.fire('فشل إنشاء الوكيل', `فشل إنشاء الوكيل. السبب: ${data.error}`, 'error');
+                 return;
+            }
 
-            agentsTableBody.innerHTML = ''; // مسح القائمة القديمة
-            if (agents.length === 0) {
-                agentsTableBody.innerHTML = `<tr><td colspan="2">لا يوجد وكلاء مضافون لهذه المدرسة بعد.</td></tr>`;
-            } else {
-                agents.forEach(agent => {
-                    const row = `<tr><td>${agent.name}</td><td>${agent.email}</td></tr>`;
-                    agentsTableBody.innerHTML += row;
-                });
-            }
-        }
-        
-        // --- دالة لجلب اسم المدرسة ---
-        async function loadSchoolDetails() {
-            if (!schoolId) {
-                document.body.innerHTML = '<h1>خطأ: لم يتم تحديد المدرسة في الرابط.</h1>';
-                return;
-            }
-            const { data: school, error } = await _supabase.from('schools').select('name').eq('id', schoolId).single();
-            if (school) {
-                schoolNameHeader.textContent = `لوحة التحكم الخاصة بمدرسة: ${school.name}`;
-            } else {
-                console.error('Error fetching school details:', error);
-            }
+            console.log('Function executed successfully:', data.message);
+            Swal.fire('نجاح!', 'تم إنشاء الوكيل وربطه بالمدرسة بنجاح.', 'success').then(() => {
+                location.reload();
+            });
         }
 
-        // --- ربط الأحداث ---
-        addAgentForm.addEventListener('submit', (e) => {
+        // --- ربط النموذج بالدالة الجديدة ---
+        document.getElementById('addAgentForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const agentName = document.getElementById('agentName').value;
             const agentEmail = document.getElementById('agentEmail').value;
             const agentPassword = document.getElementById('agentPassword').value;
-            createNewAgent(agentEmail, agentPassword, agentName, schoolId);
+            createAgentViaFunction(agentEmail, agentPassword, agentName, schoolId);
         });
 
-        // --- نقطة انطلاق التطبيق ---
-        document.addEventListener('DOMContentLoaded', () => {
-            loadSchoolDetails();
-            loadAgents();
-        });
-
+        // --- بقية الدوال (loadAgents, loadSchoolDetails) تبقى كما هي ---
+        async function loadAgents() {
+            if (!schoolId) return;
+            const { data: agents, error } = await _supabase.from('agents').select('name, email').eq('school_id', schoolId);
+            if (error) { console.error('Error fetching agents:', error); return; }
+            const agentsTableBody = document.querySelector('#agentsTable tbody');
+            agentsTableBody.innerHTML = agents.map(agent => `<tr><td>${agent.name}</td><td>${agent.email}</td></tr>`).join('');
+        }
+        async function loadSchoolDetails() {
+            if (!schoolId) { document.body.innerHTML = '<h1>خطأ: لم يتم تحديد المدرسة.</h1>'; return; }
+            const { data: school } = await _supabase.from('schools').select('name').eq('id', schoolId).single();
+            if (school) { document.getElementById('schoolNameHeader').textContent = `لوحة التحكم الخاصة بمدرسة: ${school.name}`; }
+        }
+        document.addEventListener('DOMContentLoaded', () => { loadSchoolDetails(); loadAgents(); });
     </script>
 </body>
 </html>
