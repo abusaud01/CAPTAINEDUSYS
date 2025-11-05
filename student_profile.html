@@ -3,6 +3,433 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ملف الطالب - نظام الكابتن التعليمي</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #006400; /* أخضر ملكي أغمق */
+            --secondary-gold: #FFD700; /* ذهبي */
+            --background-light: #F0EAD6; /* بيج فاتح */
+            --text-dark: #333333;
+            --white: #FFFFFF;
+            --danger-red: #dc3545;
+            --success-green: #28a745;
+        }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: var(--background-light );
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .header {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            color: var(--primary-green);
+        }
+        .back-button {
+            background-color: var(--primary-green);
+            color: var(--white);
+            border: 2px solid var(--secondary-gold);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-family: 'Tajawal', sans-serif;
+            transition: background-color 0.3s;
+        }
+        .back-button:hover {
+            background-color: #004d00;
+        }
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+        .card {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .student-info-card {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, var(--primary-green), #004d00);
+            color: var(--white);
+        }
+        .student-info-card h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .student-info-card p {
+            margin: 5px 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .score-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-green);
+        }
+        .score-card .score-label {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .score-card .score-value {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .actions-card {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .action-button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            color: var(--white);
+            font-size: 16px;
+            font-family: 'Tajawal', sans-serif;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .action-button:hover {
+            transform: translateY(-2px);
+        }
+        #add-violation-btn {
+            background-color: var(--danger-red);
+        }
+        #add-praise-btn {
+            background-color: var(--success-green);
+        }
+        .log-card h3 {
+            color: var(--primary-green);
+            border-bottom: 2px solid var(--background-light);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .log-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .log-item:last-child {
+            border-bottom: none;
+        }
+        .log-item .description {
+            flex-grow: 1;
+        }
+        .log-item .points {
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        .log-item .date {
+            font-size: 12px;
+            color: #888;
+        }
+        .violation .points { color: var(--danger-red); }
+        .praise .points { color: var(--success-green); }
+        .empty-log {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1 id="student-name-header">ملف الطالب: </h1>
+        <button class="back-button" onclick="goBack()">« العودة إلى لوحة التحكم</button>
+    </div>
+
+    <div class="profile-grid">
+        <div class="card student-info-card">
+            <div>
+                <h2 id="student-name"></h2>
+                <p id="student-class"></p>
+                <p id="student-email"></p>
+            </div>
+            <div class="score-card">
+                <span class="score-label">درجة السلوك</span>
+                <span class="score-value" id="behavior-score">80</span>
+            </div>
+        </div>
+
+        <div class="card actions-card">
+            <button id="add-violation-btn" class="action-button">- تسجيل مخالفة</button>
+            <button id="add-praise-btn" class="action-button">+ إضافة سلوك إيجابي</button>
+        </div>
+
+        <div class="card log-card">
+            <h3><span style="color: var(--danger-red);">✗</span> سجل المخالفات</h3>
+            <div id="violations-log">
+                <p class="empty-log">لا توجد مخالفات مسجلة.</p>
+            </div>
+        </div>
+
+        <div class="card log-card">
+            <h3><span style="color: var(--success-green);">✓</span> سجل الإيجابيات</h3>
+            <div id="praises-log">
+                <p class="empty-log">لا توجد إيجابيات مسجلة.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- الخطوة 1: تعريف المتغيرات الأساسية ---
+        const SUPABASE_URL = 'https://xpeubmofhyoqupsjfalq.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZXVibW9maHlvcXVwc2pmYWxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyNTM3NzgsImV4cCI6MjA3NzgyOTc3OH0.A7zvw6etTDGe-WhWCisvtYcxy_JANWSBW1r3XOh2LVA';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY );
+
+        let currentStudentId = null;
+        let currentSchoolId = null;
+        let violationTypes = {};
+        let praiseTypes = {};
+
+        // --- الخطوة 2: تنفيذ الكود عند تحميل الصفحة ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            currentStudentId = urlParams.get('id');
+
+            if (!currentStudentId) {
+                alert('لم يتم تحديد هوية الطالب.');
+                window.location.href = 'captain_dashboard.html';
+                return;
+            }
+
+            await loadStudentData();
+            await loadBehaviorTypes();
+            await loadBehaviorLog();
+        });
+        
+        // --- الخطوة 3: ربط الأزرار بوظائفها ---
+        document.getElementById('add-violation-btn').addEventListener('click', () => addBehavior('violation'));
+        document.getElementById('add-praise-btn').addEventListener('click', () => addBehavior('praise'));
+
+        // --- الخطوة 4: تعريف الدوال المساعدة ---
+
+        async function loadStudentData() {
+            const { data, error } = await supabase
+                .from('students')
+                .select('id, name, class, email, school_id, behavior_score')
+                .eq('id', currentStudentId)
+                .single();
+
+            if (error) {
+                console.error('Error loading student data:', error);
+                alert('خطأ في تحميل بيانات الطالب.');
+                return;
+            }
+
+            if (data) {
+                currentSchoolId = data.school_id;
+                document.getElementById('student-name-header').textContent = `ملف الطالب: ${data.name}`;
+                document.getElementById('student-name').textContent = data.name;
+                document.getElementById('student-class').textContent = `الفصل: ${data.class || 'غير محدد'}`;
+                document.getElementById('student-email').textContent = data.email;
+                document.getElementById('behavior-score').textContent = data.behavior_score;
+            }
+        }
+
+        async function loadBehaviorTypes() {
+            const { data, error } = await supabase.from('behavior_types').select('*');
+            if (error) {
+                console.error('Error loading behavior types:', error);
+                return;
+            }
+            data.forEach(type => {
+                if (type.type === 'violation') {
+                    violationTypes[type.id] = type.description;
+                } else if (type.type === 'praise') {
+                    praiseTypes[type.id] = type.description;
+                }
+            });
+        }
+
+        async function logSchoolEvent(eventType, description) {
+            if (!currentSchoolId) {
+                console.error("School ID is not available. Cannot log event.");
+                return;
+            }
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                console.error("User not authenticated.");
+                return;
+            }
+
+            const { data: agentData, error: agentError } = await supabase
+                .from('agents')
+                .select('name')
+                .eq('user_id', user.id)
+                .single();
+
+            if (agentError) {
+                console.error('Error fetching agent name:', agentError);
+                return;
+            }
+            const agentName = agentData ? agentData.name : 'غير معروف';
+            const fullDescription = `${description} (بواسطة: ${agentName})`;
+
+            const { error } = await supabase.from('school_events').insert({
+                school_id: currentSchoolId,
+                event_type: eventType,
+                description: fullDescription
+            });
+
+            if (error) {
+                console.error('Failed to log school event:', error);
+            }
+        }
+
+        async function addBehavior(type) {
+            const types = type === 'violation' ? violationTypes : praiseTypes;
+            const inputTitle = type === 'violation' ? 'تسجيل مخالفة جديدة' : 'إضافة سلوك إيجابي';
+            
+            const { value: selectedId } = await Swal.fire({
+                title: inputTitle,
+                input: 'select',
+                inputOptions: types,
+                inputPlaceholder: 'اختر النوع',
+                showCancelButton: true,
+                confirmButtonText: 'إضافة',
+                cancelButtonText: 'إلغاء'
+            });
+
+            if (selectedId) {
+                const isViolation = type === 'violation';
+                const { data: typeData, error: typeError } = await supabase
+                    .from('behavior_types')
+                    .select(isViolation ? 'deduction_points' : 'reward_points')
+                    .eq('id', selectedId)
+                    .single();
+
+                if (typeError) {
+                    console.error('Error fetching points:', typeError);
+                    Swal.fire('خطأ!', 'لم يتم العثور على النقاط المرتبطة.', 'error');
+                    return;
+                }
+
+                const points = isViolation ? typeData.deduction_points : typeData.reward_points;
+                const description = types[selectedId];
+
+                const { error: insertError } = await supabase.from('student_behavior_log').insert({
+                    student_id: currentStudentId,
+                    school_id: currentSchoolId,
+                    violation_type_id: isViolation ? selectedId : null,
+                    praise_type_id: !isViolation ? selectedId : null,
+                    description: description,
+                    deduction_points: isViolation ? points : null,
+                    reward_points: !isViolation ? points : null
+                });
+
+                if (insertError) {
+                    console.error('Supabase error:', insertError);
+                    Swal.fire('خطأ!', `فشل تسجيل السلوك: ${insertError.message}`, 'error');
+                } else {
+                    Swal.fire('تم!', `تم تسجيل السلوك بنجاح.`, 'success');
+                    const eventType = isViolation ? 'Violation Added' : 'Praise Added';
+                    const eventDescription = `تسجيل سلوك للطالب ${document.getElementById('student-name').textContent}: ${description}`;
+                    await logSchoolEvent(eventType, eventDescription);
+                    await loadBehaviorLog(); // Refresh logs and score
+                }
+            }
+        }
+
+        async function loadBehaviorLog() {
+            const { data, error } = await supabase
+                .from('student_behavior_log')
+                .select('*')
+                .eq('student_id', currentStudentId)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Error loading behavior log:', error);
+                return;
+            }
+
+            const violationsLog = document.getElementById('violations-log');
+            const praisesLog = document.getElementById('praises-log');
+            violationsLog.innerHTML = '';
+            praisesLog.innerHTML = '';
+
+            let totalDeductions = 0;
+            let totalRewards = 0;
+            let violationsCount = 0;
+            let praisesCount = 0;
+
+            data.forEach(log => {
+                const logItem = document.createElement('div');
+                logItem.classList.add('log-item');
+                const date = new Date(log.created_at).toLocaleDateString('ar-SA');
+
+                if (log.violation_type_id) {
+                    totalDeductions += log.deduction_points;
+                    violationsCount++;
+                    logItem.classList.add('violation');
+                    logItem.innerHTML = `
+                        <span class="description">${log.description}</span>
+                        <span class="points">-${log.deduction_points}</span>
+                        <span class="date">${date}</span>
+                    `;
+                    violationsLog.appendChild(logItem);
+                } else if (log.praise_type_id) {
+                    totalRewards += log.reward_points;
+                    praisesCount++;
+                    logItem.classList.add('praise');
+                    logItem.innerHTML = `
+                        <span class="description">${log.description}</span>
+                        <span class="points">+${log.reward_points}</span>
+                        <span class="date">${date}</span>
+                    `;
+                    praisesLog.appendChild(logItem);
+                }
+            });
+
+            if (violationsCount === 0) {
+                violationsLog.innerHTML = '<p class="empty-log">لا توجد مخالفات مسجلة.</p>';
+            }
+            if (praisesCount === 0) {
+                praisesLog.innerHTML = '<p class="empty-log">لا توجد إيجابيات مسجلة.</p>';
+            }
+
+            document.getElementById('behavior-score').textContent = 80 - totalDeductions + totalRewards;
+        }
+
+        function goBack() {
+            window.location.href = `captain_dashboard.html?school_id=${currentSchoolId}`;
+        }
+    </script>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ملف الطالب - نظام الكابتن</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
