@@ -11,7 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root { --royal-green: #004225; --gold-accent: #FFD700; --light-cream: #F5F5DC; --dark-charcoal: #333333; --white: #FFFFFF; --light-gray: #f8f9fa; --gray-border: #dee2e6; --danger-red: #dc3545; --success-green: #198754; }
-        body { font-family: 'Tajawal', sans-serif; background-color: var(--light-cream ); margin: 0; }
+        body { font-family: 'Tajawal', sans-serif; background-color: var(--light-cream  ); margin: 0; }
         .header { background-color: var(--royal-green); color: var(--white); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .header h1 { margin: 0; font-size: 28px; }
         .back-btn { background-color: transparent; border: 2px solid var(--gold-accent); color: var(--gold-accent); padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; transition: all 0.3s ease; }
@@ -83,7 +83,7 @@
     <script>
         const supabaseUrl = 'https://xpeubmofhyoqupsjfalq.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZXVibW9maHlvcXVwc2pmYWxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyNTM3NzgsImV4cCI6MjA3NzgyOTc3OH0.A7zvw6etTDGe-WhWCisvtYcxy_JANWSBW1r3XOh2LVA';
-        const _supabase = supabase.createClient(supabaseUrl, supabaseKey );
+        const _supabase = supabase.createClient(supabaseUrl, supabaseKey  );
 
         const params = new URLSearchParams(window.location.search);
         const studentId = params.get('id');
@@ -103,12 +103,13 @@
         let praiseTypes = {};
         let currentStudentName = '';
 
+        // --- الإصلاح الجراحي 1: تعديل الدالة لتعيد الخطأ ---
         async function logSchoolEvent(description) {
-            // **التصحيح الحاسم هنا: استخدام اسم الجدول الصحيح**
-            const { error } = await _supabase.from('school_events').insert([{ school_id: schoolId, description: description }]);
+            const { error } = await _supabase.from('school_events').insert([{ school_id: schoolId, description: description, event_type: 'Behavior Log' }]);
             if (error) {
                 console.error('Failed to log school event:', error);
             }
+            return error; // أعد الخطأ (سيكون null في حالة النجاح)
         }
 
         function formatTimeAgo(date) {
@@ -188,6 +189,7 @@
 
             if (violationId) {
                 const selectedViolation = violationTypes[violationId];
+                // الخطوة 1: إضافة السلوك
                 const { error: behaviorError } = await _supabase.from('student_behavior_log').insert([{ student_id: studentId, school_id: schoolId, violation_type_id: violationId, description: selectedViolation.description, deduction_points: selectedViolation.points }]);
                 
                 if (behaviorError) {
@@ -196,10 +198,17 @@
                     return;
                 }
 
-                await logSchoolEvent(`تم تسجيل مخالفة "${selectedViolation.description}" للطالب: ${currentStudentName}`);
+                // الخطوة 2: تسجيل الحدث
+                const logError = await logSchoolEvent(`تم تسجيل مخالفة "${selectedViolation.description}" للطالب: ${currentStudentName}`);
                 
-                Swal.fire('تم!', 'تم تسجيل المخالفة بنجاح.', 'success');
-                await loadBehaviorLogs();
+                // --- الإصلاح الجراحي 2: التحقق من نجاح كلتا العمليتين ---
+                if (logError) {
+                    Swal.fire('خطأ في السجل!', 'تم تسجيل المخالفة ولكن فشل تحديث سجل المدرسة. يرجى مراجعة وحدة التحكم.', 'warning');
+                    // لا نحدث الواجهة هنا لأن العملية لم تكتمل بنجاح
+                } else {
+                    Swal.fire('تم!', 'تم تسجيل المخالفة بنجاح.', 'success');
+                    await loadBehaviorLogs(); // تحديث الواجهة فقط عند النجاح الكامل
+                }
             }
         });
 
@@ -215,6 +224,7 @@
 
             if (praiseId) {
                 const selectedPraise = praiseTypes[praiseId];
+                // الخطوة 1: إضافة السلوك
                 const { error: behaviorError } = await _supabase.from('student_behavior_log').insert([{ student_id: studentId, school_id: schoolId, praise_type_id: praiseId, description: selectedPraise.description, reward_points: selectedPraise.points }]);
 
                 if (behaviorError) {
@@ -223,10 +233,16 @@
                     return;
                 }
 
-                await logSchoolEvent(`تم منح سلوك إيجابي "${selectedPraise.description}" للطالب: ${currentStudentName}`);
+                // الخطوة 2: تسجيل الحدث
+                const logError = await logSchoolEvent(`تم منح سلوك إيجابي "${selectedPraise.description}" للطالب: ${currentStudentName}`);
 
-                Swal.fire('تم!', 'تم تسجيل السلوك الإيجابي بنجاح.', 'success');
-                await loadBehaviorLogs();
+                // --- الإصلاح الجراحي 2: التحقق من نجاح كلتا العمليتين ---
+                if (logError) {
+                    Swal.fire('خطأ في السجل!', 'تم تسجيل السلوك ولكن فشل تحديث سجل المدرسة. يرجى مراجعة وحدة التحكم.', 'warning');
+                } else {
+                    Swal.fire('تم!', 'تم تسجيل السلوك الإيجابي بنجاح.', 'success');
+                    await loadBehaviorLogs(); // تحديث الواجهة فقط عند النجاح الكامل
+                }
             }
         });
 
