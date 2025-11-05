@@ -199,13 +199,17 @@
     </div>
 
     <script>
+        // --- الخطوة 1: تعريف المتغيرات الأساسية ---
         const SUPABASE_URL = 'https://xpeubmofhyoqupsjfalq.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZXVibW9maHlvcXVwc2pmYWxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyNTM3NzgsImV4cCI6MjA3NzgyOTc3OH0.A7zvw6etTDGe-WhWCisvtYcxy_JANWSBW1r3XOh2LVA';
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY );
 
         let currentStudentId = null;
         let currentSchoolId = null;
+        let violationTypes = {};
+        let praiseTypes = {};
 
+        // --- الخطوة 2: تنفيذ الكود عند تحميل الصفحة ---
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             currentStudentId = urlParams.get('id');
@@ -220,6 +224,12 @@
             await loadBehaviorTypes();
             await loadBehaviorLog();
         });
+        
+        // --- الخطوة 3: ربط الأزرار بوظائفها ---
+        document.getElementById('add-violation-btn').addEventListener('click', () => addBehavior('violation'));
+        document.getElementById('add-praise-btn').addEventListener('click', () => addBehavior('praise'));
+
+        // --- الخطوة 4: تعريف الدوال المساعدة ---
 
         async function loadStudentData() {
             const { data, error } = await supabase
@@ -244,9 +254,6 @@
             }
         }
 
-        let violationTypes = {};
-        let praiseTypes = {};
-
         async function loadBehaviorTypes() {
             const { data, error } = await supabase.from('behavior_types').select('*');
             if (error) {
@@ -267,10 +274,16 @@
                 console.error("School ID is not available. Cannot log event.");
                 return;
             }
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                console.error("User not authenticated.");
+                return;
+            }
+
             const { data: agentData, error: agentError } = await supabase
                 .from('agents')
                 .select('name')
-                .eq('user_id', (await supabase.auth.getUser()).data.user.id)
+                .eq('user_id', user.id)
                 .single();
 
             if (agentError) {
@@ -336,7 +349,7 @@
                     console.error('Supabase error:', insertError);
                     Swal.fire('خطأ!', `فشل تسجيل السلوك: ${insertError.message}`, 'error');
                 } else {
-                    Swal.fire('تم!', `تم تسجيل السلوك الإيجابي بنجاح.`, 'success');
+                    Swal.fire('تم!', `تم تسجيل السلوك بنجاح.`, 'success');
                     const eventType = isViolation ? 'Violation Added' : 'Praise Added';
                     const eventDescription = `تسجيل سلوك للطالب ${document.getElementById('student-name').textContent}: ${description}`;
                     await logSchoolEvent(eventType, eventDescription);
@@ -344,9 +357,6 @@
                 }
             }
         }
-
-        document.getElementById('add-violation-btn').addEventListener('click', () => addBehavior('violation'));
-        document.getElementById('add-praise-btn').addEventListener('click', () => addBehavior('praise'));
 
         async function loadBehaviorLog() {
             const { data, error } = await supabase
