@@ -3,278 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم الكابتن</title>
-    
+    <title>دخول - نظام الكابتن التعليمي</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-
+    <!-- 1. تضمين مكتبة Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* --- CSS: The Royal Styling --- */
-        :root {
-            --royal-green: #004225;
-            --gold-accent: #FFD700;
-            --light-cream: #F5F5DC;
-            --dark-charcoal: #333333;
-        }
-
-        body {
-            font-family: 'Tajawal', sans-serif; 
-            background-color: var(--light-cream );
-            color: var(--dark-charcoal);
-            margin: 0;
-            display: flex;
-        }
-
-        .sidebar {
-            width: 250px;
-            background-color: var(--royal-green);
-            color: var(--light-cream);
-            padding: 20px;
-            height: 100vh;
-            position: fixed;
-            box-shadow: -5px 0px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .sidebar h2 {
-            color: var(--gold-accent);
-            text-align: center;
-            margin-bottom: 40px;
-            font-weight: 700;
-        }
-
-        .sidebar nav a {
-            display: block;
-            color: var(--light-cream);
-            text-decoration: none;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            transition: background-color 0.3s, color 0.3s;
-            font-weight: 400;
-        }
-
-        .sidebar nav a:hover, .sidebar nav a.active {
-            background-color: rgba(255, 215, 0, 0.1);
-            border-right: 4px solid var(--gold-accent);
-            color: var(--gold-accent);
-            font-weight: 700;
-        }
-
-        .main-content {
-            margin-right: 250px;
-            padding: 40px;
-            width: calc(100% - 250px);
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        header h1 {
-            color: var(--royal-green);
-            font-weight: 700;
-        }
-
-        .add-school-btn {
-            background-color: var(--gold-accent);
-            color: var(--royal-green);
-            border: none;
-            padding: 12px 25px;
-            font-size: 16px;
-            font-weight: 700;
-            font-family: 'Tajawal', sans-serif;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .add-school-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        /* --- قسم قائمة المدارس --- */
-        .schools-list {
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.07);
-        }
-        .school-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-        }
-        .school-item:last-child { border-bottom: none; }
-        .school-item span { font-size: 18px; }
-
-        /* --- تصميم النافذة المنبثقة (Modal) --- */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            display: none; /* مخفي بشكل افتراضي */
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 15px;
-            width: 500px;
-            text-align: center;
-            border-top: 8px solid var(--royal-green);
-        }
-        .modal-content h2 { color: var(--royal-green); }
-        .modal-input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #DDD;
-            border-radius: 8px;
-            font-family: 'Tajawal', sans-serif;
-            font-size: 16px;
-            box-sizing: border-box;
-            margin-top: 20px;
-            margin-bottom: 30px;
-        }
-        .modal-actions button {
-            padding: 12px 30px;
-            font-size: 16px;
-            font-weight: 700;
-            font-family: 'Tajawal', sans-serif;
-            border-radius: 8px;
-            cursor: pointer;
-            border: none;
-            margin: 0 10px;
-        }
-        .btn-confirm {
-            background-color: var(--royal-green);
-            color: white;
-        }
-        .btn-cancel {
-            background-color: #DDD;
-            color: var(--dark-charcoal);
-        }
+        /* ... نفس أكواد CSS السابقة ... */
+        :root { --royal-green: #004225; --gold-accent: #FFD700; --light-cream: #F5F5DC; --dark-charcoal: #333333; --error-red: #D32F2F; }
+        body { font-family: 'Tajawal', sans-serif; background-color: var(--light-cream ); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-container { background-color: #FFFFFF; padding: 40px 50px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); width: 400px; text-align: center; border-top: 8px solid var(--royal-green); }
+        .login-container h1 { color: var(--royal-green); font-weight: 700; font-size: 28px; margin-bottom: 10px; }
+        .login-container h1 .gold-text { color: var(--gold-accent); }
+        .login-container p { color: #777; margin-bottom: 30px; }
+        .input-group { margin-bottom: 20px; text-align: right; }
+        .input-group label { display: block; margin-bottom: 8px; color: var(--dark-charcoal); font-weight: 700; }
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #DDD; border-radius: 8px; font-family: 'Tajawal', sans-serif; font-size: 16px; box-sizing: border-box; transition: border-color 0.3s, box-shadow 0.3s; }
+        .input-group input:focus { outline: none; border-color: var(--gold-accent); box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+        .login-btn { width: 100%; padding: 15px; background-color: var(--royal-green); color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: 700; font-family: 'Tajawal', sans-serif; cursor: pointer; transition: background-color 0.3s, transform 0.2s; }
+        .login-btn:hover { background-color: #005a34; transform: translateY(-2px); }
+        #error-message { color: var(--error-red); margin-top: 15px; font-weight: 700; display: none; }
     </style>
 </head>
 <body>
-
-    <div class="sidebar">
-        <h2>نظام الكابتن</h2>
-        <nav>
-            <a href="#" class="active" onclick="showSection('dashboard')">لوحة الإدارة</a>
-            <a href="#" onclick="showSection('log')">سجل النظام الشامل</a>
-        </nav>
-    </div>
-
-    <div class="main-content">
-        <!-- قسم إدارة المدارس -->
-        <div id="dashboard">
-            <header>
-                <h1>إدارة المدارس</h1>
-                <button class="add-school-btn" onclick="openAddSchoolModal()">+ إضافة مدرسة جديدة</button>
-            </header>
-            <div id="schools-list-container" class="schools-list">
-                <!-- سيتم إضافة المدارس هنا ديناميكيًا -->
-                <p id="no-schools-message">لا توجد مدارس مضافة حتى الآن.</p>
+    <div class="login-container">
+        <h1>نظام <span class="gold-text">الكابتن</span></h1>
+        <p>لوحة تحكم المدير الأساسي</p>
+        <form id="login-form" onsubmit="handleLogin(event)">
+            <div class="input-group">
+                <label for="email">البريد الإلكتروني</label>
+                <input type="email" id="email" name="email" required>
             </div>
-        </div>
-
-        <!-- قسم الصندوق الأسود (مخفي) -->
-        <div id="log" style="display: none;">
-            <!-- ... محتوى سجل النظام الشامل كما هو ... -->
-        </div>
-    </div>
-
-    <!-- النافذة المنبثقة لإضافة مدرسة (مخفية) -->
-    <div id="addSchoolModal" class="modal-overlay">
-        <div class="modal-content">
-            <h2>إضافة مدرسة جديدة</h2>
-            <form id="add-school-form" onsubmit="handleAddSchool(event)">
-                <input type="text" id="school-name-input" class="modal-input" placeholder="أدخل اسم المدرسة هنا..." required>
-                <div class="modal-actions">
-                    <button type="submit" class="btn-confirm">إضافة</button>
-                    <button type="button" class="btn-cancel" onclick="closeAddSchoolModal()">إلغاء</button>
-                </div>
-            </form>
-        </div>
+            <div class="input-group">
+                <label for="password">كلمة المرور</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="login-btn">تسجيل الدخول</button>
+            <p id="error-message"></p>
+        </form>
     </div>
 
     <script>
         // --- JavaScript: The Brains ---
 
-        // دالة للتنقل بين الأقسام
-        function showSection(sectionId) {
-            // ... الكود كما هو ...
-        }
+        // 2. إعداد الاتصال مع Supabase باستخدام مفاتيحك
+        const supabaseUrl = 'https://xpeubmofhyoqupsjfalq.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZXVibW9maHlvcXVwc2pmYWxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyNTM3NzgsImV4cCI6MjA3NzgyOTc3OH0.A7zvw6etTDGe-WhWCisvtYcxy_JANWSBW1r3XOh2LVA';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey );
 
-        // --- منطق النافذة المنبثقة (Modal) ---
-        const modal = document.getElementById('addSchoolModal');
-
-        function openAddSchoolModal() {
-            modal.style.display = 'flex';
-        }
-
-        function closeAddSchoolModal() {
-            modal.style.display = 'none';
-            document.getElementById('add-school-form').reset(); // مسح الحقل عند الإغلاق
-        }
-
-        // إغلاق النافذة عند الضغط خارجها
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                closeAddSchoolModal();
-            }
-        }
-
-        // --- منطق إضافة مدرسة ---
-        function handleAddSchool(event) {
+        // 3. استبدال المحاكاة بالاتصال الحقيقي
+        async function handleLogin(event) {
             event.preventDefault();
-            const schoolNameInput = document.getElementById('school-name-input');
-            const schoolName = schoolNameInput.value.trim();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.style.display = 'none';
 
-            if (schoolName) {
-                console.log(`Adding school: ${schoolName}`);
+            // الاتصال بـ Supabase لتسجيل الدخول
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
 
-                // SUPABASE_HOOK: هنا سيتم استدعاء supabase.from('schools').insert({ name: schoolName })
-                // سنقوم بمحاكاة النجاح وإضافة المدرسة إلى الواجهة مباشرة
-
-                // محاكاة: إضافة المدرسة إلى القائمة في الواجهة
-                addSchoolToList(schoolName);
-                
-                closeAddSchoolModal();
+            if (error) {
+                // في حال وجود خطأ من Supabase
+                console.error('Authentication error:', error.message);
+                errorMessage.textContent = 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+                errorMessage.style.display = 'block';
+            } else {
+                // في حال نجاح الدخول
+                console.log('Authentication successful. Redirecting...');
+                // التوجيه إلى لوحة التحكم
+                window.location.href = 'captain_dashboard.html';
             }
-        }
-
-        function addSchoolToList(name) {
-            const listContainer = document.getElementById('schools-list-container');
-            const noSchoolsMessage = document.getElementById('no-schools-message');
-            
-            // إخفاء رسالة "لا توجد مدارس" إذا كانت موجودة
-            if (noSchoolsMessage) {
-                noSchoolsMessage.style.display = 'none';
-            }
-
-            // إنشاء عنصر المدرسة الجديد
-            const schoolItem = document.createElement('div');
-            schoolItem.className = 'school-item';
-            schoolItem.innerHTML = `<span>${name}</span>`; // عرض اسم المدرسة
-            
-            // إضافة العنصر الجديد إلى القائمة
-            listContainer.appendChild(schoolItem);
         }
     </script>
-
 </body>
 </html>
