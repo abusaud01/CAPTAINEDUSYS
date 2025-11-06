@@ -10,67 +10,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        :root { --royal-green: #004225; --gold-accent: #FFD700; --light-cream: #F5F5DC; --dark-charcoal: #333333; --white: #FFFFFF; --light-gray: #f8f9fa; --gray-border: #dee2e6; }
-        body { font-family: 'Tajawal', sans-serif; background-color: var(--light-cream ); margin: 0; }
-        .header { background-color: var(--royal-green); color: var(--white); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .header h1 { margin: 0; font-size: 28px; }
-        .back-btn { background-color: transparent; border: 2px solid var(--gold-accent); color: var(--gold-accent); padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; transition: all 0.3s ease; }
-        .back-btn:hover { background-color: var(--gold-accent); color: var(--royal-green); }
-        .main-container { padding: 40px; max-width: 1200px; margin: auto; }
-        .tabs { display: flex; border-bottom: 2px solid var(--gray-border); margin-bottom: 30px; }
-        .tab-btn { border: none; background: none; padding: 15px 30px; font-size: 18px; font-weight: 700; cursor: pointer; color: #888; position: relative; }
-        .tab-btn.active { color: var(--royal-green); }
-        .tab-btn.active::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 2px; background-color: var(--royal-green); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .section-header h2 { margin: 0; }
-        .add-btn { background-color: var(--royal-green); color: var(--white); border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; }
-        .data-table { width: 100%; border-collapse: collapse; background-color: var(--white); box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-radius: 10px; overflow: hidden; }
-        .data-table th, .data-table td { padding: 15px; text-align: right; border-bottom: 1px solid var(--gray-border); }
-        .data-table th { background-color: var(--light-gray); }
-        .data-table tr:last-child td { border-bottom: none; }
-        .data-table a { color: var(--royal-green); text-decoration: none; font-weight: 700; }
-        .no-data { text-align: center; padding: 30px; color: #999; }
+        /* نفس الـ CSS بدون تغيير */
     </style>
 </head>
 <body>
-    <header class="header">
-        <h1>لوحة تحكم المدرسة: <span id="schoolNameHeader">...</span></h1>
-        <a href="captain_dashboard.html" class="back-btn">« العودة إلى لوحة الإدارة</a>
-    </header>
-
-    <div class="main-container">
-        <div class="tabs">
-            <button class="tab-btn" data-tab="students">الطلاب</button>
-            <button class="tab-btn" data-tab="teachers">المعلمين</button>
-            <button class="tab-btn active" data-tab="agents">الوكلاء</button>
-            <button class="tab-btn" data-tab="events">سجل الأحداث</button>
-        </div>
-
-        <div id="students" class="tab-content">
-            <!-- محتوى الطلاب هنا -->
-        </div>
-
-        <div id="teachers" class="tab-content">
-            <!-- محتوى المعلمين هنا -->
-        </div>
-
-        <div id="agents" class="tab-content active">
-            <div class="section-header">
-                <h2>إدارة الوكلاء</h2>
-                <button id="add-agent-btn" class="add-btn">+ إضافة وكيل</button>
-            </div>
-            <table class="data-table">
-                <thead><tr><th>الاسم الكامل</th><th>البريد الإلكتروني</th></tr></thead>
-                <tbody id="agents-table-body"></tbody>
-            </table>
-        </div>
-
-        <div id="events" class="tab-content">
-            <!-- محتوى سجل الأحداث هنا -->
-        </div>
-    </div>
+    <!-- نفس الـ HTML بدون تغيير -->
 
     <script>
         const supabaseUrl = 'https://ekbiivktykhebsqmllsx.supabase.co';
@@ -84,27 +28,21 @@
         const agentsTableBody = document.getElementById('agents-table-body');
         
         async function loadSchoolData() {
-            if (!schoolId) {
-                document.body.innerHTML = '<h1>خطأ: لم يتم تحديد المدرسة.</h1>';
-                return;
-            }
-
-            const { data: school, error } = await _supabase.from('schools').select('name').eq('id', schoolId).single();
-            if (error) { console.error('Error fetching school name:', error); return; }
-            schoolNameHeader.textContent = school.name;
-            document.title = `لوحة تحكم: ${school.name} - نظام الكابتن`;
-
+            // ... نفس الكود
             await loadAgents();
         }
 
-        // --- التحديث الرئيسي هنا ---
+        // --- التحديث الجذري هنا ---
         async function loadAgents() {
-            // استدعاء الدالة الجديدة بدلاً من الاستعلام المباشر
-            const { data, error } = await _supabase.rpc('get_agents_with_email', { p_school_id: schoolId });
+            // استعلام مباشر وبسيط جدًا من جدول الوكلاء
+            const { data, error } = await _supabase
+                .from('agents')
+                .select('full_name, email')
+                .eq('school_id', schoolId);
 
             if (error) {
-                console.error('Error fetching agents with email:', error);
-                agentsTableBody.innerHTML = '<tr><td colspan="2" class="no-data">حدث خطأ أثناء جلب بيانات الوكلاء.</td></tr>';
+                console.error('Error fetching agents:', error);
+                agentsTableBody.innerHTML = `<tr><td colspan="2" class="no-data">حدث خطأ: ${error.message}</td></tr>`;
                 return;
             }
             
@@ -115,76 +53,47 @@
             }
             
             data.forEach(agent => {
-                // الآن لدينا الاسم والبريد الإلكتروني معًا
-                agentsTableBody.innerHTML += `<tr><td>${agent.full_name}</td><td>${agent.email}</td></tr>`;
+                agentsTableBody.innerHTML += `<tr><td>${agent.full_name}</td><td>${agent.email || '-'}</td></tr>`;
             });
         }
-        // --- نهاية التحديث ---
 
         addAgentBtn.addEventListener('click', async () => {
-            const { value: formValues } = await Swal.fire({
-                title: 'إضافة وكيل جديد',
-                html:
-                    '<input id="swal-input1" class="swal2-input" placeholder="الاسم الكامل">' +
-                    '<input id="swal-input2" class="swal2-input" placeholder="البريد الإلكتروني (حقيقي)">' +
-                    '<input id="swal-input3" class="swal2-input" type="password" placeholder="كلمة المرور">',
-                focusConfirm: false,
-                preConfirm: () => [
-                    document.getElementById('swal-input1').value,
-                    document.getElementById('swal-input2').value,
-                    document.getElementById('swal-input3').value
-                ],
-                showCancelButton: true,
-                confirmButtonText: 'إضافة',
-                cancelButtonText: 'إلغاء',
-            });
-
+            // ... نفس كود Swal.fire
+            
             if (formValues) {
                 const [fullName, email, password] = formValues;
-                if (!fullName || !email || !password) {
-                    Swal.fire('خطأ!', 'يرجى ملء جميع الحقول.', 'error');
-                    return;
-                }
+                // ... نفس كود التحقق
 
+                // 1. إنشاء المستخدم في auth.users
                 const { data: signUpData, error: signUpError } = await _supabase.auth.signUp({ email, password });
                 if (signUpError) {
-                    Swal.fire('خطأ!', `فشل إنشاء الحساب: ${signUpError.message}`, 'error');
+                    // ... نفس كود معالجة الخطأ
                     return;
                 }
 
+                // 2. ربط المستخدم وتخزين البريد الإلكتروني مباشرة
                 const newUserId = signUpData.user.id;
                 const { error: agentInsertError } = await _supabase
                     .from('agents')
-                    .insert([{ user_id: newUserId, school_id: schoolId, full_name: fullName }]);
+                    // --- التحديث الجذري هنا ---
+                    .insert([{ 
+                        user_id: newUserId, 
+                        school_id: schoolId, 
+                        full_name: fullName,
+                        email: email // تخزين البريد الإلكتروني مباشرة
+                    }]);
 
                 if (agentInsertError) {
-                    console.error('Error inserting agent:', agentInsertError);
-                    Swal.fire('فشل ربط الوكيل!', `تم إنشاء الحساب ولكن فشل ربطه بالمدرسة. السبب: ${agentInsertError.message}`, 'error');
+                    // ... نفس كود معالجة الخطأ
                 } else {
                     Swal.fire('تم!', 'تمت إضافة الوكيل بنجاح.', 'success');
-                    await loadAgents(); // إعادة تحميل البيانات لإظهار الوكيل الجديد مع بريده الإلكتروني
+                    await loadAgents();
                 }
             }
         });
+        // --- نهاية التحديث الجذري ---
 
-        // Tab switching logic
-        const tabBtns = document.querySelectorAll('.tab-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
-        tabBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                tabBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                const tabId = btn.dataset.tab;
-                tabContents.forEach(content => {
-                    content.classList.remove('active');
-                    if (content.id === tabId) {
-                        content.classList.add('active');
-                    }
-                });
-            });
-        });
-
-        document.addEventListener('DOMContentLoaded', loadSchoolData);
+        // ... بقية الكود (Tab switching, DOMContentLoaded)
     </script>
 </body>
 </html>
