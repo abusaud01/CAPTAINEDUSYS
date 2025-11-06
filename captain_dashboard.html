@@ -113,14 +113,6 @@
             transform: translateY(-5px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.1);
         }
-        .school-card h3 {
-            margin: 0 0 10px 0;
-            font-size: 20px;
-        }
-        .school-card p {
-            margin: 0;
-            color: #777;
-        }
         .no-schools {
             background-color: var(--white);
             padding: 40px;
@@ -159,19 +151,19 @@
 
         const schoolsListContainer = document.getElementById('schools-list-container');
         const addSchoolBtn = document.getElementById('add-school-btn');
-        let captainId = null;
 
         async function getCaptainId() {
             const { data: { user }, error } = await _supabase.auth.getUser();
             if (error || !user) {
-                console.error('User not logged in:', error);
-                window.location.href = 'index.html';
+                console.error('User not logged in or error fetching user:', error);
+                // Redirect to login if no user is found
+                window.location.href = 'index.html'; 
                 return null;
             }
             return user.id;
         }
 
-        async function loadSchools() {
+        async function loadSchools(captainId) {
             if (!captainId) return;
             const { data, error } = await _supabase
                 .from('schools')
@@ -214,25 +206,31 @@
             });
 
             if (schoolName) {
-                // **الإصلاح الحاسم هنا: إرسال البيانات كمصفوفة من الكائنات**
+                // **الإصلاح الحاسم هنا: التأكد من الحصول على captainId قبل الإضافة**
+                const currentCaptainId = await getCaptainId();
+                if (!currentCaptainId) {
+                    Swal.fire('خطأ!', 'لا يمكن تحديد هوية المستخدم. يرجى تسجيل الدخول مرة أخرى.', 'error');
+                    return;
+                }
+
                 const { data, error } = await _supabase
                     .from('schools')
-                    .insert([{ name: schoolName, captain_id: captainId }]);
+                    .insert([{ name: schoolName, captain_id: currentCaptainId }]);
 
                 if (error) {
                     console.error('Error adding school:', error);
                     Swal.fire('خطأ!', 'حدث خطأ أثناء إضافة المدرسة.', 'error');
                 } else {
                     Swal.fire('تم!', 'تمت إضافة المدرسة بنجاح.', 'success');
-                    await loadSchools();
+                    await loadSchools(currentCaptainId);
                 }
             }
         });
 
         document.addEventListener('DOMContentLoaded', async () => {
-            captainId = await getCaptainId();
+            const captainId = await getCaptainId();
             if (captainId) {
-                await loadSchools();
+                await loadSchools(captainId);
             }
         });
     </script>
