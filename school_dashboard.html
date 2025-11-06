@@ -42,35 +42,21 @@
 
     <div class="main-container">
         <div class="tabs">
-            <button class="tab-btn active" data-tab="students">الطلاب</button>
+            <button class="tab-btn" data-tab="students">الطلاب</button>
             <button class="tab-btn" data-tab="teachers">المعلمين</button>
-            <button class="tab-btn" data-tab="agents">الوكلاء</button>
+            <button class="tab-btn active" data-tab="agents">الوكلاء</button>
             <button class="tab-btn" data-tab="events">سجل الأحداث</button>
         </div>
 
-        <div id="students" class="tab-content active">
-            <div class="section-header">
-                <h2>إدارة الطلاب</h2>
-                <button id="add-student-btn" class="add-btn">+ إضافة طالب</button>
-            </div>
-            <table class="data-table">
-                <thead><tr><th>الاسم</th><th>الفصل</th><th>درجة السلوك</th><th></th></tr></thead>
-                <tbody id="students-table-body"></tbody>
-            </table>
+        <div id="students" class="tab-content">
+            <!-- محتوى الطلاب هنا -->
         </div>
 
         <div id="teachers" class="tab-content">
-            <div class="section-header">
-                <h2>إدارة المعلمين</h2>
-                <button id="add-teacher-btn" class="add-btn">+ إضافة معلم</button>
-            </div>
-            <table class="data-table">
-                <thead><tr><th>الاسم الكامل</th><th>البريد الإلكتروني</th></tr></thead>
-                <tbody id="teachers-table-body"></tbody>
-            </table>
+            <!-- محتوى المعلمين هنا -->
         </div>
 
-        <div id="agents" class="tab-content">
+        <div id="agents" class="tab-content active">
             <div class="section-header">
                 <h2>إدارة الوكلاء</h2>
                 <button id="add-agent-btn" class="add-btn">+ إضافة وكيل</button>
@@ -82,13 +68,7 @@
         </div>
 
         <div id="events" class="tab-content">
-            <div class="section-header">
-                <h2>سجل أحداث المدرسة</h2>
-            </div>
-            <table class="data-table">
-                <thead><tr><th>الوصف</th><th>التاريخ</th></tr></thead>
-                <tbody id="events-table-body"></tbody>
-            </table>
+            <!-- محتوى سجل الأحداث هنا -->
         </div>
     </div>
 
@@ -101,28 +81,8 @@
         const schoolId = params.get('id');
         const schoolNameHeader = document.getElementById('schoolNameHeader');
         const addAgentBtn = document.getElementById('add-agent-btn');
-        const addTeacherBtn = document.getElementById('add-teacher-btn');
-        const addStudentBtn = document.getElementById('add-student-btn');
         const agentsTableBody = document.getElementById('agents-table-body');
-        const teachersTableBody = document.getElementById('teachers-table-body');
-        const studentsTableBody = document.getElementById('students-table-body');
-        const eventsTableBody = document.getElementById('events-table-body');
-
-        function formatTimeAgo(date) {
-            const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-            let interval = seconds / 31536000;
-            if (interval > 1) return `منذ ${Math.floor(interval)} سنة`;
-            interval = seconds / 2592000;
-            if (interval > 1) return `منذ ${Math.floor(interval)} شهر`;
-            interval = seconds / 86400;
-            if (interval > 1) return `منذ ${Math.floor(interval)} يوم`;
-            interval = seconds / 3600;
-            if (interval > 1) return `منذ ${Math.floor(interval)} ساعة`;
-            interval = seconds / 60;
-            if (interval > 1) return `منذ ${Math.floor(interval)} دقيقة`;
-            return `منذ ثوانٍ`;
-        }
-
+        
         async function loadSchoolData() {
             if (!schoolId) {
                 document.body.innerHTML = '<h1>خطأ: لم يتم تحديد المدرسة.</h1>';
@@ -134,44 +94,46 @@
             schoolNameHeader.textContent = school.name;
             document.title = `لوحة تحكم: ${school.name} - نظام الكابتن`;
 
-            await Promise.all([loadAgents(), loadTeachers(), loadStudents(), loadEvents()]);
+            await loadAgents();
         }
 
+        // --- التحديث الرئيسي هنا ---
         async function loadAgents() {
-            const { data, error } = await _supabase.from('agents').select('full_name, user_id').eq('school_id', schoolId);
-            if (error) { console.error('Error fetching agents:', error); return; }
+            // استدعاء الدالة الجديدة بدلاً من الاستعلام المباشر
+            const { data, error } = await _supabase.rpc('get_agents_with_email', { p_school_id: schoolId });
+
+            if (error) {
+                console.error('Error fetching agents with email:', error);
+                agentsTableBody.innerHTML = '<tr><td colspan="2" class="no-data">حدث خطأ أثناء جلب بيانات الوكلاء.</td></tr>';
+                return;
+            }
             
             agentsTableBody.innerHTML = '';
             if (data.length === 0) {
                 agentsTableBody.innerHTML = '<tr><td colspan="2" class="no-data">لا يوجد وكلاء مضافون لهذه المدرسة بعد.</td></tr>';
                 return;
             }
-            // We need to fetch emails from auth.users, this is a bit more complex
-            // For now, we'll just display the name. A better solution would use a database function.
+            
             data.forEach(agent => {
-                agentsTableBody.innerHTML += `<tr><td>${agent.full_name}</td><td>-</td></tr>`;
+                // الآن لدينا الاسم والبريد الإلكتروني معًا
+                agentsTableBody.innerHTML += `<tr><td>${agent.full_name}</td><td>${agent.email}</td></tr>`;
             });
         }
-
-        async function loadTeachers() { /* Similar to loadAgents */ }
-        async function loadStudents() { /* Similar to loadAgents */ }
-        async function loadEvents() { /* Similar to loadAgents */ }
+        // --- نهاية التحديث ---
 
         addAgentBtn.addEventListener('click', async () => {
             const { value: formValues } = await Swal.fire({
                 title: 'إضافة وكيل جديد',
                 html:
                     '<input id="swal-input1" class="swal2-input" placeholder="الاسم الكامل">' +
-                    '<input id="swal-input2" class="swal2-input" placeholder="البريد الإلكتروني">' +
+                    '<input id="swal-input2" class="swal2-input" placeholder="البريد الإلكتروني (حقيقي)">' +
                     '<input id="swal-input3" class="swal2-input" type="password" placeholder="كلمة المرور">',
                 focusConfirm: false,
-                preConfirm: () => {
-                    return [
-                        document.getElementById('swal-input1').value,
-                        document.getElementById('swal-input2').value,
-                        document.getElementById('swal-input3').value
-                    ]
-                },
+                preConfirm: () => [
+                    document.getElementById('swal-input1').value,
+                    document.getElementById('swal-input2').value,
+                    document.getElementById('swal-input3').value
+                ],
                 showCancelButton: true,
                 confirmButtonText: 'إضافة',
                 cancelButtonText: 'إلغاء',
@@ -184,26 +146,23 @@
                     return;
                 }
 
-                // 1. Create the user in auth.users
                 const { data: signUpData, error: signUpError } = await _supabase.auth.signUp({ email, password });
                 if (signUpError) {
                     Swal.fire('خطأ!', `فشل إنشاء الحساب: ${signUpError.message}`, 'error');
                     return;
                 }
 
-                // 2. Link the new user to the agents table
                 const newUserId = signUpData.user.id;
                 const { error: agentInsertError } = await _supabase
                     .from('agents')
                     .insert([{ user_id: newUserId, school_id: schoolId, full_name: fullName }]);
 
                 if (agentInsertError) {
-                    // This is the critical error we were facing
                     console.error('Error inserting agent:', agentInsertError);
                     Swal.fire('فشل ربط الوكيل!', `تم إنشاء الحساب ولكن فشل ربطه بالمدرسة. السبب: ${agentInsertError.message}`, 'error');
                 } else {
                     Swal.fire('تم!', 'تمت إضافة الوكيل بنجاح.', 'success');
-                    await loadAgents();
+                    await loadAgents(); // إعادة تحميل البيانات لإظهار الوكيل الجديد مع بريده الإلكتروني
                 }
             }
         });
