@@ -3,157 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - نظام الكابتن التعليمي</title>
+    <title>لوحة تحكم الكابتن - نظام الكابتن</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        :root { --royal-green: #004225; --gold-accent: #FFD700; --light-cream: #F5F5DC; --dark-charcoal: #333333; --white: #FFFFFF; --light-gray: #f8f9fa; --gray-border: #dee2e6; --modal-backdrop: rgba(0, 0, 0, 0.6 ); }
-        body { font-family: 'Tajawal', sans-serif; background-color: var(--light-cream); margin: 0; display: flex; height: 100vh; }
-        .sidebar { width: 250px; background-color: var(--royal-green); color: var(--white); display: flex; flex-direction: column; padding: 20px; box-shadow: -5px 0 15px rgba(0,0,0,0.1); z-index: 10; }
-        .sidebar h2 { text-align: center; color: var(--gold-accent); margin-bottom: 30px; font-size: 24px; }
-        .sidebar nav a { color: var(--white); text-decoration: none; padding: 15px 20px; display: block; border-radius: 8px; margin-bottom: 10px; transition: background-color 0.3s; }
-        .sidebar nav a.active, .sidebar nav a:hover { background-color: rgba(255, 255, 255, 0.1); }
-        /* **التعديل:** جعل المحتوى الرئيسي يأخذ المساحة المتبقية */
-        .main-content { flex-grow: 1; display: flex; flex-direction: column; }
-        .content-wrapper { padding: 40px; flex-grow: 1; overflow-y: auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .header h1 { color: var(--dark-charcoal); font-size: 32px; margin: 0; padding-right: 15px; }
-        .add-school-btn { background-color: var(--gold-accent); color: var(--dark-charcoal); border: none; padding: 12px 25px; border-radius: 8px; font-family: 'Tajawal', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; transition: background-color 0.3s, transform 0.2s; }
-        .add-school-btn:hover { background-color: #e6c300; transform: translateY(-2px); }
-        .schools-list { background-color: var(--white); border-radius: 8px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); }
-        .school-item { display: block; padding: 20px; border-bottom: 1px solid var(--gray-border); text-decoration: none; color: var(--dark-charcoal); font-size: 18px; transition: background-color 0.2s; }
-        .school-item:last-child { border-bottom: none; }
-        .school-item:hover { background-color: var(--light-gray); }
-        #loading-state { text-align: center; padding: 40px; font-size: 18px; color: #777; }
-        .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--modal-backdrop); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: var(--white); padding: 30px 40px; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); width: 450px; text-align: center; }
-        .modal-content h3 { margin-top: 0; margin-bottom: 20px; color: var(--royal-green); font-size: 22px; }
-        .modal-content input { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #DDD; border-radius: 8px; font-family: 'Tajawal', sans-serif; font-size: 16px; box-sizing: border-box; }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 15px; }
-        .modal-btn { padding: 10px 25px; border: none; border-radius: 8px; font-family: 'Tajawal', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; transition: background-color 0.3s; }
-        .save-btn { background-color: var(--royal-green); color: var(--white); }
-        .save-btn:hover { background-color: #005a34; }
-        .cancel-btn { background-color: #eee; color: var(--dark-charcoal); }
-        .cancel-btn:hover { background-color: #ddd; }
-        /* **الإضافة الهندسية:** قسم الحقوق */
-        .footer { text-align: center; padding: 15px; background-color: #e9e9e2; color: #777; font-size: 14px; border-top: 1px solid #ddd; }
+        :root {
+            --royal-green: #004225;
+            --gold-accent: #FFD700;
+            --light-cream: #F5F5DC;
+            --dark-charcoal: #333333;
+            --white: #FFFFFF;
+            --light-gray: #f8f9fa;
+            --gray-border: #dee2e6;
+        }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: var(--light-cream );
+            margin: 0;
+            display: flex;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: var(--royal-green);
+            color: var(--white);
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar h2 {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--gold-accent);
+        }
+        .sidebar nav a {
+            display: block;
+            color: var(--white);
+            text-decoration: none;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        .sidebar nav a.active, .sidebar nav a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .sidebar .logout-btn {
+            margin-top: auto;
+            background-color: var(--gold-accent);
+            color: var(--royal-green);
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .main-content {
+            flex-grow: 1;
+            padding: 40px;
+            overflow-y: auto;
+            height: 100vh;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+            color: var(--dark-charcoal);
+        }
+        .add-school-btn {
+            background-color: var(--gold-accent);
+            color: var(--royal-green);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .add-school-btn:hover {
+            transform: translateY(-2px);
+        }
+        .schools-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        .school-card {
+            background-color: var(--white);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            text-decoration: none;
+            color: var(--dark-charcoal);
+            transition: all 0.3s ease;
+        }
+        .school-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        .school-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 20px;
+        }
+        .school-card p {
+            margin: 0;
+            color: #777;
+        }
+        .no-schools {
+            background-color: var(--white);
+            padding: 40px;
+            text-align: center;
+            border-radius: 10px;
+            color: #999;
+            grid-column: 1 / -1;
+        }
     </style>
 </head>
 <body>
+
     <div class="sidebar">
-        <h2>نظام <span style="color: var(--gold-accent);">الكابتن</span></h2>
+        <h2>نظام الكابتن</h2>
         <nav>
             <a href="#" class="active">لوحة الإدارة</a>
             <a href="#">سجل النظام الشامل</a>
         </nav>
+        <button class="logout-btn">تسجيل الخروج</button>
     </div>
+
     <div class="main-content">
-        <div class="content-wrapper">
-            <div class="header">
-                <h1>إدارة المدارس</h1>
-                <button class="add-school-btn" id="addSchoolBtn">+ إضافة مدرسة جديدة</button>
-            </div>
-            <div class="schools-list" id="schoolsList">
-                <div id="loading-state">جاري تحميل المدارس...</div>
-            </div>
+        <div class="header">
+            <h1>إدارة المدارس</h1>
+            <button id="add-school-btn" class="add-school-btn">+ إضافة مدرسة جديدة</button>
         </div>
-        <footer class="footer">
-            © 2025 نظام الكابتن التعليمي. جميع الحقوق محفوظة.
-        </footer>
-    </div>
-    <div class="modal-backdrop" id="addSchoolModal">
-        <div class="modal-content">
-            <h3>نظام الكابتن التعليمي يقول لك</h3>
-            <input type="text" id="schoolNameInput" placeholder="الرجاء إدخال اسم المدرسة الجديدة">
-            <div class="modal-actions">
-                <button class="modal-btn cancel-btn" id="cancelBtn">إلغاء</button>
-                <button class="modal-btn save-btn" id="saveSchoolBtn">حفظ</button>
-            </div>
+        <div id="schools-list-container" class="schools-list">
+            <p class="no-schools">لا توجد مدارس مضافة حاليًا.</p>
         </div>
     </div>
 
     <script>
-        // ... نفس كود الجافاسكريبت من الإصدار السابق ...
         const supabaseUrl = 'https://xpeubmofhyoqupsjfalq.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZXVibW9maHlvcXVwc2pmYWxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyNTM3NzgsImV4cCI6MjA3NzgyOTc3OH0.A7zvw6etTDGe-WhWCisvtYcxy_JANWSBW1r3XOh2LVA';
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey );
 
-        const schoolsListDiv = document.getElementById('schoolsList');
-        const loadingStateDiv = document.getElementById('loading-state');
-        const addSchoolBtn = document.getElementById('addSchoolBtn');
-        const modal = document.getElementById('addSchoolModal');
-        const schoolNameInput = document.getElementById('schoolNameInput');
-        const saveSchoolBtn = document.getElementById('saveSchoolBtn');
-        const cancelBtn = document.getElementById('cancelBtn');
+        const schoolsListContainer = document.getElementById('schools-list-container');
+        const addSchoolBtn = document.getElementById('add-school-btn');
+        let captainId = null;
 
-        async function fetchSchools() {
-            loadingStateDiv.style.display = 'block';
-            schoolsListDiv.innerHTML = '';
-            schoolsListDiv.appendChild(loadingStateDiv);
+        async function getCaptainId() {
+            const { data: { user }, error } = await _supabase.auth.getUser();
+            if (error || !user) {
+                console.error('User not logged in:', error);
+                window.location.href = 'index.html';
+                return null;
+            }
+            return user.id;
+        }
 
-            const { data: schools, error } = await _supabase.from('schools').select('id, name');
-
-            loadingStateDiv.style.display = 'none';
+        async function loadSchools() {
+            if (!captainId) return;
+            const { data, error } = await _supabase
+                .from('schools')
+                .select('*')
+                .eq('captain_id', captainId);
 
             if (error) {
                 console.error('Error fetching schools:', error);
-                schoolsListDiv.innerHTML = '<div style="text-align: center; padding: 20px; color: red;">حدث خطأ أثناء تحميل المدارس.</div>';
                 return;
             }
 
-            if (schools.length === 0) {
-                schoolsListDiv.innerHTML = '<div style="text-align: center; padding: 20px; color: #777;">لا توجد مدارس مضافة حاليًا.</div>';
+            schoolsListContainer.innerHTML = '';
+            if (data.length === 0) {
+                schoolsListContainer.innerHTML = '<p class="no-schools">لا توجد مدارس مضافة حاليًا.</p>';
             } else {
-                schoolsListDiv.innerHTML = '';
-                schools.forEach(school => {
-                    const schoolLink = document.createElement('a');
-                    schoolLink.className = 'school-item';
-                    schoolLink.href = `school_dashboard.html?id=${school.id}`;
-                    schoolLink.textContent = school.name;
-                    schoolsListDiv.appendChild(schoolLink);
+                data.forEach(school => {
+                    const schoolCard = document.createElement('a');
+                    schoolCard.href = `school_dashboard.html?id=${school.id}`;
+                    schoolCard.className = 'school-card';
+                    schoolCard.innerHTML = `<h3>${school.name}</h3><p>انقر لعرض التفاصيل</p>`;
+                    schoolsListContainer.appendChild(schoolCard);
                 });
             }
         }
 
-        function openModal() {
-            schoolNameInput.value = '';
-            modal.style.display = 'flex';
-            schoolNameInput.focus();
-        }
+        addSchoolBtn.addEventListener('click', async () => {
+            const { value: schoolName } = await Swal.fire({
+                title: 'إضافة مدرسة جديدة',
+                input: 'text',
+                inputLabel: 'اسم المدرسة',
+                inputPlaceholder: 'أدخل اسم المدرسة هنا',
+                showCancelButton: true,
+                confirmButtonText: 'حفظ',
+                cancelButtonText: 'إلغاء',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'يجب إدخال اسم المدرسة!'
+                    }
+                }
+            });
 
-        function closeModal() {
-            modal.style.display = 'none';
-        }
+            if (schoolName) {
+                // **الإصلاح الحاسم هنا: إرسال البيانات كمصفوفة من الكائنات**
+                const { data, error } = await _supabase
+                    .from('schools')
+                    .insert([{ name: schoolName, captain_id: captainId }]);
 
-        async function handleSaveSchool() {
-            const schoolName = schoolNameInput.value;
-            if (schoolName && schoolName.trim() !== '') {
-                const { data, error } = await _supabase.from('schools').insert([{ name: schoolName.trim() }]);
                 if (error) {
                     console.error('Error adding school:', error);
-                    alert('حدث خطأ أثناء إضافة المدرسة.');
+                    Swal.fire('خطأ!', 'حدث خطأ أثناء إضافة المدرسة.', 'error');
                 } else {
-                    console.log('School added successfully:', data);
-                    closeModal();
-                    fetchSchools();
+                    Swal.fire('تم!', 'تمت إضافة المدرسة بنجاح.', 'success');
+                    await loadSchools();
                 }
-            } else {
-                alert('الرجاء إدخال اسم صحيح للمدرسة.');
-            }
-        }
-
-        addSchoolBtn.addEventListener('click', openModal);
-        cancelBtn.addEventListener('click', closeModal);
-        saveSchoolBtn.addEventListener('click', handleSaveSchool);
-        modal.addEventListener('click', (event) => {
-            if (event.target === modal) {
-                closeModal();
             }
         });
 
-        document.addEventListener('DOMContentLoaded', fetchSchools);
+        document.addEventListener('DOMContentLoaded', async () => {
+            captainId = await getCaptainId();
+            if (captainId) {
+                await loadSchools();
+            }
+        });
     </script>
+
 </body>
 </html>
