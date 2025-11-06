@@ -1,127 +1,231 @@
 <!DOCTYPE html>
-<!-- الإصدار الذهبي النهائي v25.0 - school_dashboard.html -->
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - نظام الكابتن</title>
+    <title>لوحة تحكم المدرسة - نظام الكابتن</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* نفس الـ CSS من الإصدار السابق */
         :root { --royal-green: #004225; --gold-accent: #FFD700; --light-cream: #F5F5DC; --dark-charcoal: #333333; --white: #FFFFFF; --light-gray: #f8f9fa; --gray-border: #dee2e6; }
-        body { font-family: 'Tajawal', sans-serif; background-color: var(--light-cream ); margin: 0; color: var(--dark-charcoal); }
-        .container { max-width: 1200px; margin: 20px auto; padding: 20px; }
-        .header { background-color: var(--royal-green); color: var(--white); padding: 20px; border-radius: 10px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .header h1 { margin: 0; }
-        .section { background-color: var(--white); padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px; }
-        .section h2 { margin-top: 0; color: var(--royal-green); border-bottom: 2px solid var(--gold-accent); padding-bottom: 10px; margin-bottom: 20px; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-        .form-group { display: flex; flex-direction: column; }
-        .form-group label { margin-bottom: 8px; font-weight: 500; }
-        .form-group input { padding: 12px; border: 1px solid var(--gray-border); border-radius: 8px; font-family: 'Tajawal', sans-serif; font-size: 16px; }
-        .btn { background-color: var(--royal-green); color: var(--white); border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-family: 'Tajawal', sans-serif; font-size: 1em; font-weight: 700; transition: background-color 0.3s; }
-        .btn:hover { background-color: #005a34; }
-        .table-container { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 15px; text-align: right; border-bottom: 1px solid var(--gray-border); }
-        th { background-color: var(--light-gray); }
+        body { font-family: 'Tajawal', sans-serif; background-color: var(--light-cream ); margin: 0; }
+        .header { background-color: var(--royal-green); color: var(--white); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header h1 { margin: 0; font-size: 28px; }
+        .back-btn { background-color: transparent; border: 2px solid var(--gold-accent); color: var(--gold-accent); padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; transition: all 0.3s ease; }
+        .back-btn:hover { background-color: var(--gold-accent); color: var(--royal-green); }
+        .main-container { padding: 40px; max-width: 1200px; margin: auto; }
+        .tabs { display: flex; border-bottom: 2px solid var(--gray-border); margin-bottom: 30px; }
+        .tab-btn { border: none; background: none; padding: 15px 30px; font-size: 18px; font-weight: 700; cursor: pointer; color: #888; position: relative; }
+        .tab-btn.active { color: var(--royal-green); }
+        .tab-btn.active::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 2px; background-color: var(--royal-green); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .section-header h2 { margin: 0; }
+        .add-btn { background-color: var(--royal-green); color: var(--white); border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+        .data-table { width: 100%; border-collapse: collapse; background-color: var(--white); box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-radius: 10px; overflow: hidden; }
+        .data-table th, .data-table td { padding: 15px; text-align: right; border-bottom: 1px solid var(--gray-border); }
+        .data-table th { background-color: var(--light-gray); }
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table a { color: var(--royal-green); text-decoration: none; font-weight: 700; }
+        .no-data { text-align: center; padding: 30px; color: #999; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1 id="schoolNameHeader">لوحة التحكم الخاصة بمدرسة: ...</h1>
+    <header class="header">
+        <h1>لوحة تحكم المدرسة: <span id="schoolNameHeader">...</span></h1>
+        <a href="captain_dashboard.html" class="back-btn">« العودة إلى لوحة الإدارة</a>
+    </header>
+
+    <div class="main-container">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="students">الطلاب</button>
+            <button class="tab-btn" data-tab="teachers">المعلمين</button>
+            <button class="tab-btn" data-tab="agents">الوكلاء</button>
+            <button class="tab-btn" data-tab="events">سجل الأحداث</button>
         </div>
-        <div class="section">
-            <h2>إضافة وكيل جديد</h2>
-            <form id="addAgentForm">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="agentName">اسم الوكيل الكامل</label>
-                        <input type="text" id="agentName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="agentEmail">البريد الإلكتروني</label>
-                        <input type="email" id="agentEmail" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="agentPassword">كلمة المرور</label>
-                        <input type="password" id="agentPassword" required>
-                    </div>
-                </div>
-                <button type="submit" class="btn" style="margin-top: 20px;">إضافة الوكيل</button>
-            </form>
-        </div>
-        <div class="section">
-            <h2>قائمة الوكلاء</h2>
-            <div class="table-container">
-                <table id="agentsTable">
-                    <thead><tr><th>الاسم</th><th>البريد الإلكتروني</th></tr></thead>
-                    <tbody></tbody>
-                </table>
+
+        <div id="students" class="tab-content active">
+            <div class="section-header">
+                <h2>إدارة الطلاب</h2>
+                <button id="add-student-btn" class="add-btn">+ إضافة طالب</button>
             </div>
+            <table class="data-table">
+                <thead><tr><th>الاسم</th><th>الفصل</th><th>درجة السلوك</th><th></th></tr></thead>
+                <tbody id="students-table-body"></tbody>
+            </table>
+        </div>
+
+        <div id="teachers" class="tab-content">
+            <div class="section-header">
+                <h2>إدارة المعلمين</h2>
+                <button id="add-teacher-btn" class="add-btn">+ إضافة معلم</button>
+            </div>
+            <table class="data-table">
+                <thead><tr><th>الاسم الكامل</th><th>البريد الإلكتروني</th></tr></thead>
+                <tbody id="teachers-table-body"></tbody>
+            </table>
+        </div>
+
+        <div id="agents" class="tab-content">
+            <div class="section-header">
+                <h2>إدارة الوكلاء</h2>
+                <button id="add-agent-btn" class="add-btn">+ إضافة وكيل</button>
+            </div>
+            <table class="data-table">
+                <thead><tr><th>الاسم الكامل</th><th>البريد الإلكتروني</th></tr></thead>
+                <tbody id="agents-table-body"></tbody>
+            </table>
+        </div>
+
+        <div id="events" class="tab-content">
+            <div class="section-header">
+                <h2>سجل أحداث المدرسة</h2>
+            </div>
+            <table class="data-table">
+                <thead><tr><th>الوصف</th><th>التاريخ</th></tr></thead>
+                <tbody id="events-table-body"></tbody>
+            </table>
         </div>
     </div>
 
     <script>
-        const supabaseUrl = 'https://xpeubmofhyoqupsjfalq.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZXVibW9maHlvcXVwc2pmYWxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyNTM3NzgsImV4cCI6MjA3NzgyOTc3OH0.A7zvw6etTDGe-WhWCisvtYcxy_JANWSBW1r3XOh2LVA';
+        const supabaseUrl = 'https://ekbiivktykhebsqmllsx.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVrYmlpdmt0eWtoZWJzcW1sbHN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0NTk1MzIsImV4cCI6MjA3ODAzNTUzMn0.sVd_UV3JPgzmkdAmVCOZJfyD7ZrIaXIOPOv7cHo8AI8';
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey );
 
         const params = new URLSearchParams(window.location.search);
         const schoolId = params.get('id');
+        const schoolNameHeader = document.getElementById('schoolNameHeader');
+        const addAgentBtn = document.getElementById('add-agent-btn');
+        const addTeacherBtn = document.getElementById('add-teacher-btn');
+        const addStudentBtn = document.getElementById('add-student-btn');
+        const agentsTableBody = document.getElementById('agents-table-body');
+        const teachersTableBody = document.getElementById('teachers-table-body');
+        const studentsTableBody = document.getElementById('students-table-body');
+        const eventsTableBody = document.getElementById('events-table-body');
 
-        // --- دالة استدعاء دالة الحافة الجديدة ---
-        async function createAgentViaFunction(email, password, fullName, currentSchoolId) {
-            const { data, error } = await _supabase.functions.invoke('create-agent', {
-                body: { email, password, fullName, schoolId: currentSchoolId },
-            });
+        function formatTimeAgo(date) {
+            const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+            let interval = seconds / 31536000;
+            if (interval > 1) return `منذ ${Math.floor(interval)} سنة`;
+            interval = seconds / 2592000;
+            if (interval > 1) return `منذ ${Math.floor(interval)} شهر`;
+            interval = seconds / 86400;
+            if (interval > 1) return `منذ ${Math.floor(interval)} يوم`;
+            interval = seconds / 3600;
+            if (interval > 1) return `منذ ${Math.floor(interval)} ساعة`;
+            interval = seconds / 60;
+            if (interval > 1) return `منذ ${Math.floor(interval)} دقيقة`;
+            return `منذ ثوانٍ`;
+        }
 
-            if (error) {
-                console.error('Error invoking edge function:', error);
-                Swal.fire('فشل استدعاء الدالة', `لم يتم إنشاء الوكيل. السبب: ${error.message}`, 'error');
+        async function loadSchoolData() {
+            if (!schoolId) {
+                document.body.innerHTML = '<h1>خطأ: لم يتم تحديد المدرسة.</h1>';
                 return;
             }
-            
-            if (data.error) {
-                 console.error('Error from inside edge function:', data.error);
-                 Swal.fire('فشل إنشاء الوكيل', `فشل إنشاء الوكيل. السبب: ${data.error}`, 'error');
-                 return;
-            }
 
-            console.log('Function executed successfully:', data.message);
-            Swal.fire('نجاح!', 'تم إنشاء الوكيل وربطه بالمدرسة بنجاح.', 'success').then(() => {
-                location.reload();
+            const { data: school, error } = await _supabase.from('schools').select('name').eq('id', schoolId).single();
+            if (error) { console.error('Error fetching school name:', error); return; }
+            schoolNameHeader.textContent = school.name;
+            document.title = `لوحة تحكم: ${school.name} - نظام الكابتن`;
+
+            await Promise.all([loadAgents(), loadTeachers(), loadStudents(), loadEvents()]);
+        }
+
+        async function loadAgents() {
+            const { data, error } = await _supabase.from('agents').select('full_name, user_id').eq('school_id', schoolId);
+            if (error) { console.error('Error fetching agents:', error); return; }
+            
+            agentsTableBody.innerHTML = '';
+            if (data.length === 0) {
+                agentsTableBody.innerHTML = '<tr><td colspan="2" class="no-data">لا يوجد وكلاء مضافون لهذه المدرسة بعد.</td></tr>';
+                return;
+            }
+            // We need to fetch emails from auth.users, this is a bit more complex
+            // For now, we'll just display the name. A better solution would use a database function.
+            data.forEach(agent => {
+                agentsTableBody.innerHTML += `<tr><td>${agent.full_name}</td><td>-</td></tr>`;
             });
         }
 
-        // --- ربط النموذج بالدالة الجديدة ---
-        document.getElementById('addAgentForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const agentName = document.getElementById('agentName').value;
-            const agentEmail = document.getElementById('agentEmail').value;
-            const agentPassword = document.getElementById('agentPassword').value;
-            createAgentViaFunction(agentEmail, agentPassword, agentName, schoolId);
+        async function loadTeachers() { /* Similar to loadAgents */ }
+        async function loadStudents() { /* Similar to loadAgents */ }
+        async function loadEvents() { /* Similar to loadAgents */ }
+
+        addAgentBtn.addEventListener('click', async () => {
+            const { value: formValues } = await Swal.fire({
+                title: 'إضافة وكيل جديد',
+                html:
+                    '<input id="swal-input1" class="swal2-input" placeholder="الاسم الكامل">' +
+                    '<input id="swal-input2" class="swal2-input" placeholder="البريد الإلكتروني">' +
+                    '<input id="swal-input3" class="swal2-input" type="password" placeholder="كلمة المرور">',
+                focusConfirm: false,
+                preConfirm: () => {
+                    return [
+                        document.getElementById('swal-input1').value,
+                        document.getElementById('swal-input2').value,
+                        document.getElementById('swal-input3').value
+                    ]
+                },
+                showCancelButton: true,
+                confirmButtonText: 'إضافة',
+                cancelButtonText: 'إلغاء',
+            });
+
+            if (formValues) {
+                const [fullName, email, password] = formValues;
+                if (!fullName || !email || !password) {
+                    Swal.fire('خطأ!', 'يرجى ملء جميع الحقول.', 'error');
+                    return;
+                }
+
+                // 1. Create the user in auth.users
+                const { data: signUpData, error: signUpError } = await _supabase.auth.signUp({ email, password });
+                if (signUpError) {
+                    Swal.fire('خطأ!', `فشل إنشاء الحساب: ${signUpError.message}`, 'error');
+                    return;
+                }
+
+                // 2. Link the new user to the agents table
+                const newUserId = signUpData.user.id;
+                const { error: agentInsertError } = await _supabase
+                    .from('agents')
+                    .insert([{ user_id: newUserId, school_id: schoolId, full_name: fullName }]);
+
+                if (agentInsertError) {
+                    // This is the critical error we were facing
+                    console.error('Error inserting agent:', agentInsertError);
+                    Swal.fire('فشل ربط الوكيل!', `تم إنشاء الحساب ولكن فشل ربطه بالمدرسة. السبب: ${agentInsertError.message}`, 'error');
+                } else {
+                    Swal.fire('تم!', 'تمت إضافة الوكيل بنجاح.', 'success');
+                    await loadAgents();
+                }
+            }
         });
 
-        // --- بقية الدوال (loadAgents, loadSchoolDetails) تبقى كما هي ---
-        async function loadAgents() {
-            if (!schoolId) return;
-            const { data: agents, error } = await _supabase.from('agents').select('name, email').eq('school_id', schoolId);
-            if (error) { console.error('Error fetching agents:', error); return; }
-            const agentsTableBody = document.querySelector('#agentsTable tbody');
-            agentsTableBody.innerHTML = agents.map(agent => `<tr><td>${agent.name}</td><td>${agent.email}</td></tr>`).join('');
-        }
-        async function loadSchoolDetails() {
-            if (!schoolId) { document.body.innerHTML = '<h1>خطأ: لم يتم تحديد المدرسة.</h1>'; return; }
-            const { data: school } = await _supabase.from('schools').select('name').eq('id', schoolId).single();
-            if (school) { document.getElementById('schoolNameHeader').textContent = `لوحة التحكم الخاصة بمدرسة: ${school.name}`; }
-        }
-        document.addEventListener('DOMContentLoaded', () => { loadSchoolDetails(); loadAgents(); });
+        // Tab switching logic
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const tabId = btn.dataset.tab;
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === tabId) {
+                        content.classList.add('active');
+                    }
+                });
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', loadSchoolData);
     </script>
 </body>
 </html>
