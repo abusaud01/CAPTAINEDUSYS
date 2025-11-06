@@ -16,23 +16,23 @@
             --light-cream: #F5F5DC;
             --dark-charcoal: #333333;
             --white: #FFFFFF;
-            --light-gray: #f8f9fa;
-            --gray-border: #dee2e6;
         }
         body {
             font-family: 'Tajawal', sans-serif;
             background-color: var(--light-cream );
             margin: 0;
             display: flex;
+            height: 100vh;
+            overflow: hidden;
         }
         .sidebar {
             width: 250px;
             background-color: var(--royal-green);
             color: var(--white);
             padding: 20px;
-            height: 100vh;
             display: flex;
             flex-direction: column;
+            flex-shrink: 0;
         }
         .sidebar h2 {
             font-size: 24px;
@@ -68,7 +68,6 @@
             flex-grow: 1;
             padding: 40px;
             overflow-y: auto;
-            height: 100vh;
         }
         .header {
             display: flex;
@@ -113,6 +112,14 @@
             transform: translateY(-5px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.1);
         }
+        .school-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 20px;
+        }
+        .school-card p {
+            margin: 0;
+            color: #777;
+        }
         .no-schools {
             background-color: var(--white);
             padding: 40px;
@@ -131,7 +138,7 @@
             <a href="#" class="active">لوحة الإدارة</a>
             <a href="#">سجل النظام الشامل</a>
         </nav>
-        <button class="logout-btn">تسجيل الخروج</button>
+        <button id="logout-btn" class="logout-btn">تسجيل الخروج</button>
     </div>
 
     <div class="main-content">
@@ -140,23 +147,23 @@
             <button id="add-school-btn" class="add-school-btn">+ إضافة مدرسة جديدة</button>
         </div>
         <div id="schools-list-container" class="schools-list">
-            <p class="no-schools">لا توجد مدارس مضافة حاليًا.</p>
+            <p class="no-schools">يتم الآن تحميل المدارس...</p>
         </div>
     </div>
 
     <script>
-        const supabaseUrl = 'https://xpeubmofhyoqupsjfalq.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwZXVibW9maHlvcXVwc2pmYWxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyNTM3NzgsImV4cCI6MjA3NzgyOTc3OH0.A7zvw6etTDGe-WhWCisvtYcxy_JANWSBW1r3XOh2LVA';
+        const supabaseUrl = 'https://ekbiivktykhebsqmllsx.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVrYmlpdmt0eWtoZWJzcW1sbHN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0NTk1MzIsImV4cCI6MjA3ODAzNTUzMn0.sVd_UV3JPgzmkdAmVCOZJfyD7ZrIaXIOPOv7cHo8AI8';
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey );
 
         const schoolsListContainer = document.getElementById('schools-list-container');
         const addSchoolBtn = document.getElementById('add-school-btn');
+        const logoutBtn = document.getElementById('logout-btn');
 
         async function getCaptainId() {
             const { data: { user }, error } = await _supabase.auth.getUser();
             if (error || !user) {
                 console.error('User not logged in or error fetching user:', error);
-                // Redirect to login if no user is found
                 window.location.href = 'index.html'; 
                 return null;
             }
@@ -172,6 +179,7 @@
 
             if (error) {
                 console.error('Error fetching schools:', error);
+                schoolsListContainer.innerHTML = '<p class="no-schools">حدث خطأ أثناء تحميل المدارس.</p>';
                 return;
             }
 
@@ -206,7 +214,6 @@
             });
 
             if (schoolName) {
-                // **الإصلاح الحاسم هنا: التأكد من الحصول على captainId قبل الإضافة**
                 const currentCaptainId = await getCaptainId();
                 if (!currentCaptainId) {
                     Swal.fire('خطأ!', 'لا يمكن تحديد هوية المستخدم. يرجى تسجيل الدخول مرة أخرى.', 'error');
@@ -219,12 +226,17 @@
 
                 if (error) {
                     console.error('Error adding school:', error);
-                    Swal.fire('خطأ!', 'حدث خطأ أثناء إضافة المدرسة.', 'error');
+                    Swal.fire('خطأ!', `حدث خطأ أثناء إضافة المدرسة: ${error.message}`, 'error');
                 } else {
                     Swal.fire('تم!', 'تمت إضافة المدرسة بنجاح.', 'success');
                     await loadSchools(currentCaptainId);
                 }
             }
+        });
+
+        logoutBtn.addEventListener('click', async () => {
+            await _supabase.auth.signOut();
+            window.location.href = 'index.html';
         });
 
         document.addEventListener('DOMContentLoaded', async () => {
