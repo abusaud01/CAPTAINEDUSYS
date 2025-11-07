@@ -10,59 +10,71 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* ... نفس الـ CSS بدون تغيير ... */
-        body { font-family: 'Tajawal', sans-serif; background-color: #f7f9fc; margin: 0; display: flex; }
-        .sidebar { width: 250px; background-color: #004d40; color: white; padding: 20px; height: 100vh; box-sizing: border-box; display: flex; flex-direction: column; }
-        .sidebar h2 { text-align: center; margin-bottom: 30px; }
-        .sidebar a { color: white; text-decoration: none; padding: 15px; display: block; border-radius: 4px; margin-bottom: 10px; }
-        .sidebar a:hover, .sidebar a.active { background-color: #00695c; }
-        .main-content { flex-grow: 1; padding: 40px; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .header h1 { margin: 0; }
+        :root { --royal-green: #004225; --gold-accent: #FFD700; --light-cream: #F5F5DC; --dark-charcoal: #333333; --white: #FFFFFF; --light-gray: #f8f9fa; --gray-border: #dee2e6; }
+        body { font-family: 'Tajawal', sans-serif; background-color: var(--light-cream ); margin: 0; }
+        .header { background-color: var(--royal-green); color: var(--white); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header h1 { margin: 0; font-size: 28px; }
+        .back-btn { background-color: transparent; border: 2px solid var(--gold-accent); color: var(--gold-accent); padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; transition: all 0.3s ease; }
+        .back-btn:hover { background-color: var(--gold-accent); color: var(--royal-green); }
+        .main-container { padding: 40px; max-width: 1200px; margin: auto; }
+        .tabs { display: flex; border-bottom: 2px solid var(--gray-border); margin-bottom: 30px; }
+        .tab-btn { border: none; background: none; padding: 15px 30px; font-size: 18px; font-weight: 700; cursor: pointer; color: #888; position: relative; }
+        .tab-btn.active { color: var(--royal-green); }
+        .tab-btn.active::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 2px; background-color: var(--royal-green); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        /* ... بقية الـ CSS ... */
-        #logout-btn { background-color: #ffc107; color: #333; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: auto; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .section-header h2 { margin: 0; }
+        .add-btn { background-color: var(--royal-green); color: var(--white); border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+        .data-table { width: 100%; border-collapse: collapse; background-color: var(--white); box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-radius: 10px; overflow: hidden; }
+        .data-table th, .data-table td { padding: 15px; text-align: right; border-bottom: 1px solid var(--gray-border); }
+        .data-table th { background-color: var(--light-gray); }
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table a { color: var(--royal-green); text-decoration: none; font-weight: 700; }
+        .no-data { text-align: center; padding: 30px; color: #999; }
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <h2 id="schoolNameHeader">اسم المدرسة</h2>
-        <a href="#" class="tab-link active" data-tab="agents-tab">الوكلاء</a>
-        <a href="#" class="tab-link" data-tab="teachers-tab">المعلمين</a>
-        <a href="#" class="tab-link" data-tab="students-tab">الطلاب</a>
-        <a href="#" class="tab-link" data-tab="events-tab">سجل الأحداث</a>
-        <!-- هذا هو الزر المفقود الذي تمت إضافته -->
-        <button id="logout-btn">تسجيل الخروج</button>
-    </div>
+    <header class="header">
+        <h1>لوحة تحكم المدرسة: <span id="schoolNameHeader">...</span></h1>
+        <a href="captain_dashboard.html" class="back-btn">« العودة إلى لوحة الإدارة</a>
+    </header>
 
-    <div class="main-content">
-        <!-- قسم الوكلاء -->
-        <div id="agents-tab" class="tab-content active">
-            <div class="header">
-                <h1>إدارة الوكلاء</h1>
+    <div class="main-container">
+        <div class="tabs">
+            <button class="tab-btn" data-tab="students">الطلاب</button>
+            <button class="tab-btn" data-tab="teachers">المعلمين</button>
+            <button class="tab-btn active" data-tab="agents">الوكلاء</button>
+            <button class="tab-btn" data-tab="events">سجل الأحداث</button>
+        </div>
+
+        <div id="students" class="tab-content">
+            <!-- محتوى الطلاب هنا -->
+        </div>
+
+        <div id="teachers" class="tab-content">
+            <!-- محتوى المعلمين هنا -->
+        </div>
+
+        <div id="agents" class="tab-content active">
+            <div class="section-header">
+                <h2>إدارة الوكلاء</h2>
                 <button id="add-agent-btn" class="add-btn">+ إضافة وكيل</button>
             </div>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>الاسم الكامل</th>
-                            <th>البريد الإلكتروني</th>
-                        </tr>
-                    </thead>
-                    <tbody id="agents-table-body">
-                        <!-- سيتم ملء البيانات هنا -->
-                    </tbody>
-                </table>
-            </div>
+            <table class="data-table">
+                <thead><tr><th>الاسم الكامل</th><th>البريد الإلكتروني</th></tr></thead>
+                <tbody id="agents-table-body"></tbody>
+            </table>
         </div>
-        <!-- بقية الأقسام (المعلمين، الطلاب، إلخ ) -->
+
+        <div id="events" class="tab-content">
+            <!-- محتوى سجل الأحداث هنا -->
+        </div>
     </div>
 
     <script>
-        const supabaseUrl = 'https://ekbiivktykhebsqmllsx.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVrYmlpdmt0eWtoZWJzcW1sbHN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0NTk1MzIsImV4cCI6MjA3ODAzNTUzMn0.sVd_UV3JPgzmkdAmVCOZJfyD7ZrIaXIOPOv7cHo8AI8';
+        const supabaseUrl = 'https://hwbmbhkmngkdluoohhay.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3Ym1iaGttbmdrZGx1b29oaGF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0NjU0NzAsImV4cCI6MjA3ODA0MTQ3MH0.i-dnULEeoSgKI9GB16s-YzUy6nJRqA1hnokUGnJ2LMU';
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey );
 
         const params = new URLSearchParams(window.location.search);
@@ -70,127 +82,109 @@
         const schoolNameHeader = document.getElementById('schoolNameHeader');
         const addAgentBtn = document.getElementById('add-agent-btn');
         const agentsTableBody = document.getElementById('agents-table-body');
-        const logoutBtn = document.getElementById('logout-btn'); // تعريف الزر الجديد
-
-        async function checkSession() {
-            const { data: { session } } = await _supabase.auth.getSession();
-            if (!session) {
-                window.location.href = 'index.html';
-            }
-        }
-
+        
         async function loadSchoolData() {
             if (!schoolId) {
-                alert('لم يتم تحديد المدرسة!');
-                window.location.href = 'captain_dashboard.html';
+                document.body.innerHTML = '<h1>خطأ: لم يتم تحديد المدرسة.</h1>';
                 return;
             }
-            const { data, error } = await _supabase
-                .from('schools')
-                .select('name')
-                .eq('id', schoolId)
-                .single();
-            
-            if (error || !data) {
-                alert('خطأ في جلب بيانات المدرسة.');
-                console.error('Error fetching school data:', error);
-            } else {
-                schoolNameHeader.textContent = data.name;
-                document.title = `لوحة تحكم - ${data.name}`;
-                await loadAgents();
-            }
+
+            const { data: school, error } = await _supabase.from('schools').select('name').eq('id', schoolId).single();
+            if (error) { console.error('Error fetching school name:', error); return; }
+            schoolNameHeader.textContent = school.name;
+            document.title = `لوحة تحكم: ${school.name} - نظام الكابتن`;
+
+            await loadAgents();
         }
 
+        // --- التحديث الرئيسي هنا ---
         async function loadAgents() {
-            const { data, error } = await _supabase
-                .from('agents')
-                .select('full_name, email')
-                .eq('school_id', schoolId);
+            // استدعاء الدالة الجديدة بدلاً من الاستعلام المباشر
+            const { data, error } = await _supabase.rpc('get_agents_with_email', { p_school_id: schoolId });
 
             if (error) {
-                console.error('Error fetching agents:', error);
-                agentsTableBody.innerHTML = `<tr><td colspan="2" class="no-data">حدث خطأ: ${error.message}</td></tr>`;
+                console.error('Error fetching agents with email:', error);
+                agentsTableBody.innerHTML = '<tr><td colspan="2" class="no-data">حدث خطأ أثناء جلب بيانات الوكلاء.</td></tr>';
                 return;
             }
             
             agentsTableBody.innerHTML = '';
             if (data.length === 0) {
                 agentsTableBody.innerHTML = '<tr><td colspan="2" class="no-data">لا يوجد وكلاء مضافون لهذه المدرسة بعد.</td></tr>';
-            } else {
-                data.forEach(agent => {
-                    agentsTableBody.innerHTML += `<tr><td>${agent.full_name}</td><td>${agent.email || '-'}</td></tr>`;
-                });
+                return;
             }
+            
+            data.forEach(agent => {
+                // الآن لدينا الاسم والبريد الإلكتروني معًا
+                agentsTableBody.innerHTML += `<tr><td>${agent.full_name}</td><td>${agent.email}</td></tr>`;
+            });
         }
+        // --- نهاية التحديث ---
 
         addAgentBtn.addEventListener('click', async () => {
             const { value: formValues } = await Swal.fire({
                 title: 'إضافة وكيل جديد',
                 html:
                     '<input id="swal-input1" class="swal2-input" placeholder="الاسم الكامل">' +
-                    '<input id="swal-input2" class="swal2-input" placeholder="البريد الإلكتروني">' +
+                    '<input id="swal-input2" class="swal2-input" placeholder="البريد الإلكتروني (حقيقي)">' +
                     '<input id="swal-input3" class="swal2-input" type="password" placeholder="كلمة المرور">',
                 focusConfirm: false,
-                preConfirm: () => {
-                    return [
-                        document.getElementById('swal-input1').value,
-                        document.getElementById('swal-input2').value,
-                        document.getElementById('swal-input3').value
-                    ]
-                }
+                preConfirm: () => [
+                    document.getElementById('swal-input1').value,
+                    document.getElementById('swal-input2').value,
+                    document.getElementById('swal-input3').value
+                ],
+                showCancelButton: true,
+                confirmButtonText: 'إضافة',
+                cancelButtonText: 'إلغاء',
             });
-            
+
             if (formValues) {
                 const [fullName, email, password] = formValues;
                 if (!fullName || !email || !password) {
-                    Swal.fire('خطأ!', 'الرجاء ملء جميع الحقول.', 'error');
+                    Swal.fire('خطأ!', 'يرجى ملء جميع الحقول.', 'error');
                     return;
                 }
 
                 const { data: signUpData, error: signUpError } = await _supabase.auth.signUp({ email, password });
                 if (signUpError) {
-                    Swal.fire('فشل إنشاء الحساب!', signUpError.message, 'error');
+                    Swal.fire('خطأ!', `فشل إنشاء الحساب: ${signUpError.message}`, 'error');
                     return;
                 }
 
-                if (signUpData.user) {
-                    const newUserId = signUpData.user.id;
-                    const { error: agentInsertError } = await _supabase
-                        .from('agents')
-                        .insert([{ 
-                            user_id: newUserId, 
-                            school_id: schoolId, 
-                            full_name: fullName,
-                            email: email 
-                        }]);
+                const newUserId = signUpData.user.id;
+                const { error: agentInsertError } = await _supabase
+                    .from('agents')
+                    .insert([{ user_id: newUserId, school_id: schoolId, full_name: fullName }]);
 
-                    if (agentInsertError) {
-                        Swal.fire('فشل ربط الوكيل!', `تم إنشاء الحساب ولكن فشل ربطه بالمدرسة. السبب: ${agentInsertError.message}`, 'error');
-                    } else {
-                        Swal.fire('تم!', 'تمت إضافة الوكيل بنجاح.', 'success');
-                        await loadAgents();
-                    }
+                if (agentInsertError) {
+                    console.error('Error inserting agent:', agentInsertError);
+                    Swal.fire('فشل ربط الوكيل!', `تم إنشاء الحساب ولكن فشل ربطه بالمدرسة. السبب: ${agentInsertError.message}`, 'error');
+                } else {
+                    Swal.fire('تم!', 'تمت إضافة الوكيل بنجاح.', 'success');
+                    await loadAgents(); // إعادة تحميل البيانات لإظهار الوكيل الجديد مع بريده الإلكتروني
                 }
             }
         });
 
-        // هذا هو الكود الذي كان يسبب الخطأ، والآن سيعمل لأن الزر موجود
-        logoutBtn.addEventListener('click', async () => {
-            await _supabase.auth.signOut();
-            window.location.href = 'index.html';
-        });
-
-        document.querySelectorAll('.tab-link').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                // ... كود التبديل بين التبويبات ...
+        // Tab switching logic
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const tabId = btn.dataset.tab;
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === tabId) {
+                        content.classList.add('active');
+                    }
+                });
             });
         });
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            await checkSession();
-            await loadSchoolData();
-        });
+        document.addEventListener('DOMContentLoaded', loadSchoolData);
     </script>
 </body>
 </html>
