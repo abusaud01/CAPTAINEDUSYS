@@ -87,6 +87,7 @@
             }
         }
 
+        // --- هذا هو الجزء الذي تم إصلاحه ---
         addSchoolBtn.addEventListener('click', async () => {
             const { value: schoolName } = await Swal.fire({
                 title: 'إضافة مدرسة جديدة',
@@ -99,7 +100,13 @@
             });
 
             if (schoolName) {
+                // الإصلاح: احصل على المستخدم مرة أخرى هنا قبل استخدامه
                 const { data: { user } } = await _supabase.auth.getUser();
+                if (!user) {
+                    Swal.fire('خطأ!', 'انتهت جلسة الدخول. الرجاء تسجيل الدخول مرة أخرى.', 'error');
+                    return;
+                }
+                
                 const { error } = await _supabase.from('schools').insert([{ name: schoolName, captain_id: user.id }]);
                 if (error) {
                     Swal.fire('خطأ!', `فشل إضافة المدرسة: ${error.message}`, 'error');
@@ -109,6 +116,7 @@
                 }
             }
         });
+        // --- نهاية الجزء الذي تم إصلاحه ---
 
         logoutBtn.addEventListener('click', async () => {
             await _supabase.auth.signOut();
