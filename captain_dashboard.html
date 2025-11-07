@@ -3,151 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم الكابتن - نظام الكابتن</title>
+    <title>لوحة الإدارة - نظام الكابتن</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        :root {
-            --royal-green: #004225;
-            --gold-accent: #FFD700;
-            --light-cream: #F5F5DC;
-            --dark-charcoal: #333333;
-            --white: #FFFFFF;
-        }
-        body {
-            font-family: 'Tajawal', sans-serif;
-            background-color: var(--light-cream );
-            margin: 0;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-        .sidebar {
-            width: 250px;
-            background-color: var(--royal-green);
-            color: var(--white);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-        }
-        .sidebar h2 {
-            font-size: 24px;
-            text-align: center;
-            margin-bottom: 30px;
-            color: var(--gold-accent);
-        }
-        .sidebar nav a {
-            display: block;
-            color: var(--white);
-            text-decoration: none;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            font-weight: 500;
-            transition: background-color 0.3s;
-        }
-        .sidebar nav a.active, .sidebar nav a:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-        .sidebar .logout-btn {
-            margin-top: auto;
-            background-color: var(--gold-accent);
-            color: var(--royal-green);
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 16px;
-        }
-        .main-content {
-            flex-grow: 1;
-            padding: 40px;
-            overflow-y: auto;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-        .header h1 {
-            margin: 0;
-            font-size: 32px;
-            color: var(--dark-charcoal);
-        }
-        .add-school-btn {
-            background-color: var(--gold-accent);
-            color: var(--royal-green);
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .add-school-btn:hover {
-            transform: translateY(-2px);
-        }
-        .schools-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
-        }
-        .school-card {
-            background-color: var(--white);
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            text-decoration: none;
-            color: var(--dark-charcoal);
-            transition: all 0.3s ease;
-        }
-        .school-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        }
-        .school-card h3 {
-            margin: 0 0 10px 0;
-            font-size: 20px;
-        }
-        .school-card p {
-            margin: 0;
-            color: #777;
-        }
-        .no-schools {
-            background-color: var(--white);
-            padding: 40px;
-            text-align: center;
-            border-radius: 10px;
-            color: #999;
-            grid-column: 1 / -1;
-        }
+        body { font-family: 'Tajawal', sans-serif; background-color: #f7f9fc; margin: 0; display: flex; }
+        .sidebar { width: 250px; background-color: #004d40; color: white; padding: 20px; height: 100vh; box-sizing: border-box; display: flex; flex-direction: column; }
+        .sidebar h2 { text-align: center; margin-bottom: 30px; }
+        .sidebar a { color: white; text-decoration: none; padding: 15px; display: block; border-radius: 4px; margin-bottom: 10px; }
+        .sidebar a.active { background-color: #00695c; }
+        .main-content { flex-grow: 1; padding: 40px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .header h1 { margin: 0; }
+        .add-btn { background-color: #004d40; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        .table-container { background-color: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05 ); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 15px; text-align: right; border-bottom: 1px solid #eee; }
+        th { background-color: #f8f9fa; font-weight: 600; }
+        .no-data { text-align: center; color: #888; padding: 40px; }
+        #logout-btn { background-color: #ffc107; color: #333; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: auto; }
+        .manage-btn { background-color: #007bff; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 14px; }
     </style>
 </head>
 <body>
-
     <div class="sidebar">
         <h2>نظام الكابتن</h2>
-        <nav>
-            <a href="#" class="active">لوحة الإدارة</a>
-            <a href="#">سجل النظام الشامل</a>
-        </nav>
-        <button id="logout-btn" class="logout-btn">تسجيل الخروج</button>
+        <a href="#" class="active">لوحة الإدارة</a>
+        <a href="#">سجل النظام الشامل</a>
+        <button id="logout-btn">تسجيل الخروج</button>
     </div>
 
     <div class="main-content">
         <div class="header">
             <h1>إدارة المدارس</h1>
-            <button id="add-school-btn" class="add-school-btn">+ إضافة مدرسة جديدة</button>
+            <button id="add-school-btn" class="add-btn">+ إضافة مدرسة جديدة</button>
         </div>
-        <div id="schools-list-container" class="schools-list">
-            <p class="no-schools">يتم الآن تحميل المدارس...</p>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>اسم المدرسة</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="schools-table-body"></tbody>
+            </table>
         </div>
     </div>
 
@@ -156,43 +59,30 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3Ym1iaGttbmdrZGx1b29oaGF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0NjU0NzAsImV4cCI6MjA3ODA0MTQ3MH0.i-dnULEeoSgKI9GB16s-YzUy6nJRqA1hnokUGnJ2LMU';
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey );
 
-        const schoolsListContainer = document.getElementById('schools-list-container');
+        const schoolsTableBody = document.getElementById('schools-table-body');
         const addSchoolBtn = document.getElementById('add-school-btn');
         const logoutBtn = document.getElementById('logout-btn');
 
-        async function getCaptainId() {
-            const { data: { user }, error } = await _supabase.auth.getUser();
-            if (error || !user) {
-                console.error('User not logged in or error fetching user:', error);
-                window.location.href = 'index.html'; 
-                return null;
-            }
-            return user.id;
-        }
+        async function loadSchools() {
+            schoolsTableBody.innerHTML = `<tr><td colspan="2" class="no-data">يتم الآن تحميل المدارس...</td></tr>`;
+            const { data: { user } } = await _supabase.auth.getUser();
+            if (!user) return;
 
-        async function loadSchools(captainId) {
-            if (!captainId) return;
-            const { data, error } = await _supabase
-                .from('schools')
-                .select('*')
-                .eq('captain_id', captainId);
-
+            const { data, error } = await _supabase.from('schools').select('id, name').eq('captain_id', user.id);
             if (error) {
                 console.error('Error fetching schools:', error);
-                schoolsListContainer.innerHTML = '<p class="no-schools">حدث خطأ أثناء تحميل المدارس.</p>';
+                schoolsTableBody.innerHTML = `<tr><td colspan="2" class="no-data">حدث خطأ في تحميل المدارس.</td></tr>`;
                 return;
             }
 
-            schoolsListContainer.innerHTML = '';
+            schoolsTableBody.innerHTML = '';
             if (data.length === 0) {
-                schoolsListContainer.innerHTML = '<p class="no-schools">لا توجد مدارس مضافة حاليًا.</p>';
+                schoolsTableBody.innerHTML = '<tr><td colspan="2" class="no-data">لم تقم بإضافة أي مدرسة بعد.</td></tr>';
             } else {
                 data.forEach(school => {
-                    const schoolCard = document.createElement('a');
-                    schoolCard.href = `school_dashboard.html?id=${school.id}`;
-                    schoolCard.className = 'school-card';
-                    schoolCard.innerHTML = `<h3>${school.name}</h3><p>انقر لعرض التفاصيل</p>`;
-                    schoolsListContainer.appendChild(schoolCard);
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td>${school.name}</td><td><a href="school_dashboard.html?id=${school.id}" class="manage-btn">إدارة</a></td>`;
+                    schoolsTableBody.appendChild(row);
                 });
             }
         }
@@ -204,32 +94,18 @@
                 inputLabel: 'اسم المدرسة',
                 inputPlaceholder: 'أدخل اسم المدرسة هنا',
                 showCancelButton: true,
-                confirmButtonText: 'حفظ',
-                cancelButtonText: 'إلغاء',
-                inputValidator: (value) => {
-                    if (!value) {
-                        return 'يجب إدخال اسم المدرسة!'
-                    }
-                }
+                confirmButtonText: 'إضافة',
+                cancelButtonText: 'إلغاء'
             });
 
             if (schoolName) {
-                const currentCaptainId = await getCaptainId();
-                if (!currentCaptainId) {
-                    Swal.fire('خطأ!', 'لا يمكن تحديد هوية المستخدم. يرجى تسجيل الدخول مرة أخرى.', 'error');
-                    return;
-                }
-
-                const { data, error } = await _supabase
-                    .from('schools')
-                    .insert([{ name: schoolName, captain_id: currentCaptainId }]);
-
+                const { data: { user } } = await _supabase.auth.getUser();
+                const { error } = await _supabase.from('schools').insert([{ name: schoolName, captain_id: user.id }]);
                 if (error) {
-                    console.error('Error adding school:', error);
-                    Swal.fire('خطأ!', `حدث خطأ أثناء إضافة المدرسة: ${error.message}`, 'error');
+                    Swal.fire('خطأ!', `فشل إضافة المدرسة: ${error.message}`, 'error');
                 } else {
                     Swal.fire('تم!', 'تمت إضافة المدرسة بنجاح.', 'success');
-                    await loadSchools(currentCaptainId);
+                    await loadSchools();
                 }
             }
         });
@@ -240,12 +116,13 @@
         });
 
         document.addEventListener('DOMContentLoaded', async () => {
-            const captainId = await getCaptainId();
-            if (captainId) {
-                await loadSchools(captainId);
+            const { data: { session } } = await _supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'index.html';
+            } else {
+                await loadSchools();
             }
         });
     </script>
-
 </body>
 </html>
