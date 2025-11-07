@@ -56,25 +56,13 @@
                 </table>
             </div>
         </div>
-        <!-- قسم المعلمين (وهمي) -->
-        <div id="teachers-tab" class="tab-content">
-            <div class="header"><h1>إدارة المعلمين</h1><button class="add-btn">+ إضافة معلم</button></div>
-            <div class="table-container"><div class="no-data">سيتم بناء هذه الميزة قريبًا.</div></div>
-        </div>
-        <!-- قسم الطلاب (وهمي) -->
-        <div id="students-tab" class="tab-content">
-            <div class="header"><h1>إدارة الطلاب</h1><button class="add-btn">+ إضافة طالب</button></div>
-            <div class="table-container"><div class="no-data">سيتم بناء هذه الميزة قريبًا.</div></div>
-        </div>
-        <!-- قسم سجل الأحداث (وهمي) -->
-        <div id="events-tab" class="tab-content">
-            <div class="header"><h1>سجل الأحداث</h1></div>
-            <div class="table-container"><div class="no-data">سيتم بناء هذه الميزة قريبًا.</div></div>
-        </div>
+        <!-- الأقسام الوهمية -->
+        <div id="teachers-tab" class="tab-content"><div class="header"><h1>إدارة المعلمين</h1></div><div class="table-container"><div class="no-data">سيتم بناء هذه الميزة قريبًا.</div></div></div>
+        <div id="students-tab" class="tab-content"><div class="header"><h1>إدارة الطلاب</h1></div><div class="table-container"><div class="no-data">سيتم بناء هذه الميزة قريبًا.</div></div></div>
+        <div id="events-tab" class="tab-content"><div class="header"><h1>سجل الأحداث</h1></div><div class="table-container"><div class="no-data">سيتم بناء هذه الميزة قريبًا.</div></div></div>
     </div>
 
     <script>
-        // --- هذا هو الكود الكامل والصحيح ---
         const supabaseUrl = 'https://hwbmbhkmngkdluoohhay.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3Ym1iaGttbmdrZGx1b29oaGF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0NjU0NzAsImV4cCI6MjA3ODA0MTQ3MH0.i-dnULEeoSgKI9GB16s-YzUy6nJRqA1hnokUGnJ2LMU';
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey );
@@ -88,27 +76,56 @@
         const tabLinks = document.querySelectorAll('.tab-link');
         const tabContents = document.querySelectorAll('.tab-content');
 
-        async function loadAgents() { /* ... نفس دالة loadAgents الناجحة ... */ }
-        async function loadSchoolData() { /* ... نفس دالة loadSchoolData الناجحة ... */ }
+        async function loadAgents() {
+            agentsTableBody.innerHTML = `<tr><td colspan="2" class="no-data">جاري التحميل...</td></tr>`;
+            const { data, error } = await _supabase.from('agents').select('full_name, email').eq('school_id', schoolId);
+            if (error) {
+                console.error('Error fetching agents:', error);
+                agentsTableBody.innerHTML = `<tr><td colspan="2" class="no-data">حدث خطأ اثناء جلب بيانات الوكلاء.</td></tr>`;
+                return;
+            }
+            agentsTableBody.innerHTML = '';
+            if (data.length === 0) {
+                agentsTableBody.innerHTML = '<tr><td colspan="2" class="no-data">لا يوجد وكلاء مضافون لهذه المدرسة بعد.</td></tr>';
+            } else {
+                data.forEach(agent => {
+                    agentsTableBody.innerHTML += `<tr><td>${agent.full_name}</td><td>${agent.email || '-'}</td></tr>`;
+                });
+            }
+        }
 
-        // --- هذا هو الكود الذي كان مفقودًا ---
+        async function loadSchoolData() {
+            if (!schoolId) { window.location.href = 'captain_dashboard.html'; return; }
+            const { data, error } = await _supabase.from('schools').select('name').eq('id', schoolId).single();
+            if (error || !data) {
+                console.error('Error fetching school data:', error);
+                alert('خطأ في جلب بيانات المدرسة. ستتم إعادتك.');
+                window.location.href = 'captain_dashboard.html';
+            } else {
+                schoolNameHeader.textContent = data.name;
+                document.title = `لوحة تحكم - ${data.name}`;
+                await loadAgents();
+            }
+        }
+
         tabLinks.forEach(link => {
             link.addEventListener('click', () => {
+                if (link.classList.contains('active')) return;
                 tabLinks.forEach(l => l.classList.remove('active'));
                 tabContents.forEach(c => c.classList.remove('active'));
                 link.classList.add('active');
                 document.getElementById(link.dataset.tab).classList.add('active');
             });
         });
-        // --- نهاية الكود المفقود ---
 
         addAgentBtn.addEventListener('click', async () => {
             const { value: formValues } = await Swal.fire({
                 title: 'إضافة وكيل جديد',
                 html:
-                    '<input id="swal-input1" class="swal2-input" placeholder="الاسم الكامل">' +
-                    '<input id="swal-input2" class="swal2-input" placeholder="البريد الإلكتروني">' +
-                    '<input id="swal-input3" type="password" class="swal2-input" placeholder="كلمة المرور">',
+                    '<input id="swal-input1" class="swal2-input" placeholder="الاسم الكامل" required>' +
+                    '<input id="swal-input2" type="email" class="swal2-input" placeholder="البريد الإلكتروني" required>' +
+                    '<input id="swal-input3" type="password" class="swal2-input" placeholder="كلمة المرور" required>',
+                confirmButtonText: 'إضافة',
                 focusConfirm: false,
                 preConfirm: () => {
                     return [
@@ -118,7 +135,42 @@
                     ]
                 }
             });
-            // ... بقية كود إضافة الوكيل الناجح ...
+
+            // --- هذا هو الكود الذي كان مفقودًا ---
+            if (formValues) {
+                const [fullName, email, password] = formValues;
+                if (!fullName || !email || !password) {
+                    Swal.fire('خطأ!', 'الرجاء ملء جميع الحقول.', 'error');
+                    return;
+                }
+
+                // الخطوة 1: إنشاء حساب المستخدم
+                const { data: signUpData, error: signUpError } = await _supabase.auth.signUp({ email, password });
+                if (signUpError) {
+                    Swal.fire('فشل إنشاء الحساب!', signUpError.message, 'error');
+                    return;
+                }
+
+                // الخطوة 2: ربط المستخدم كوكيل في جدول agents
+                if (signUpData.user) {
+                    const { error: agentInsertError } = await _supabase
+                        .from('agents')
+                        .insert([{ 
+                            user_id: signUpData.user.id, 
+                            school_id: schoolId, 
+                            full_name: fullName, 
+                            email: email 
+                        }]);
+
+                    if (agentInsertError) {
+                        Swal.fire('فشل ربط الوكيل!', `تم إنشاء الحساب ولكن فشل ربطه بالمدرسة. السبب: ${agentInsertError.message}`, 'error');
+                    } else {
+                        Swal.fire('تم!', 'تمت إضافة الوكيل بنجاح.', 'success');
+                        await loadAgents(); // إعادة تحميل قائمة الوكلاء لإظهار الإضافة الجديدة
+                    }
+                }
+            }
+            // --- نهاية الكود المفقود ---
         });
 
         logoutBtn.addEventListener('click', async () => { await _supabase.auth.signOut(); window.location.href = 'index.html'; });
